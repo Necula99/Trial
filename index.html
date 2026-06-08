@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forge — Studio de Marketing & Producție</title>
+
+  <!-- Fonturi editoriale: Cormorant (display serif) + Archivo (sans tehnic) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Archivo:wght@300;400;500;600&family=Archivo+Expanded:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <!-- Preload imagine hero -->
+  <link rel="preload" as="image" href="images/scene-hero.jpg"/>
+
+  <style>
+    /* =========================================================
+       FORGE — CINEMATIC EDITION
+       Estetică: editorial / luxury / architectural
+       Alb-negru desaturat, scroll narativ, parallax
+    ========================================================= */
+
+    :root {
+      --negru:    #0c0c0d;
+      --negru2:   #141416;
+      --gri-inchis: #1d1d20;
+      --gri:      #6e6e73;
+      --gri-deschis: #9a9a9f;
+      --alb:      #f5f4f1;
+      --alb-pur:  #ffffff;
+      --linie:    rgba(255,255,255,0.12);
+      --linie-dark: rgba(0,0,0,0.12);
+      --accent:   #c9a227; /* auriu subtil, doar pentru accente fine */
+
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'Archivo', -apple-system, sans-serif;
+      --sans-exp: 'Archivo Expanded', 'Archivo', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--negru);
+      color: var(--alb);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ===== Custom cursor dot ===== */
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--alb);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width .3s, height .3s, background .3s;
+      mix-blend-mode: difference;
+    }
+    .cursor.big { width: 60px; height: 60px; background: var(--alb); }
+    @media (hover: none) { .cursor { display: none; } }
+
+    /* ===== Grain overlay pe tot site-ul ===== */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* =========================================================
+       NAVIGARE
+    ========================================================= */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 32px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      mix-blend-mode: difference;
+      transition: padding .4s ease;
+    }
+    header.scrolled { padding: 20px 48px; }
+
+    .logo {
+      font-family: var(--sans-exp);
+      font-weight: 500;
+      font-size: 22px;
+      letter-spacing: 4px;
+      color: var(--alb-pur);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .logo span { font-weight: 300; }
+
+    nav.main-nav {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+    nav.main-nav a {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--alb-pur);
+      text-decoration: none;
+      font-weight: 400;
+      position: relative;
+      padding: 4px 0;
+    }
+    nav.main-nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1px;
+      background: var(--alb-pur);
+      transition: width .4s ease;
+    }
+    nav.main-nav a:hover::after { width: 100%; }
+
+    .nav-index {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--alb-pur);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .menu-toggle { display: none; }
+
+    /* =========================================================
+       HERO
+    ========================================================= */
+    .hero {
+      position: relative;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+    .hero-bg img {
+      width: 100%; height: 120%;
+      object-fit: cover;
+      object-position: center;
+      filter: grayscale(1) contrast(1.05) brightness(0.7);
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(12,12,13,0.5) 0%, transparent 30%, transparent 60%, rgba(12,12,13,0.85) 100%);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 0 48px 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .hero-title {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(48px, 9vw, 150px);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      color: var(--alb-pur);
+      max-width: 70%;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--gri-deschis);
+    }
+    .hero-meta {
+      text-align: right;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gri-deschis);
+      line-height: 2;
+      padding-bottom: 10px;
+    }
+    .hero-scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gri-deschis);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-scroll .line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--gri-deschis), transparent);
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+    @keyframes scrollLine {
+      0%, 100% { transform: scaleY(1); opacity: 1; }
+      50% { transform: scaleY(0.5); opacity: 0.3; }
+    }
+
+    /* Top label deasupra hero */
+    .hero-tag {
+      position: absolute;
+      top: 120px;
+      left: 48px;
+      z-index: 2;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gri-deschis);
+    }
+
+    /* =========================================================
+       SECȚIUNI NARATIVE (work showcase) — full screen
+    ========================================================= */
+    .chapter {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      overflow: hidden;
+    }
+    .chapter.reverse { grid-template-columns: 1fr 1fr; }
+
+    .chapter-text {
+      padding: 80px;
+      position: relative;
+      z-index: 2;
+    }
+    .chapter.reverse .chapter-text { order: 2; }
+
+    .chapter-index {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--accent);
+      margin-bottom: 24px;
+      font-variant-numeric: tabular-nums;
+    }
+    .chapter-title {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(40px, 5.5vw, 88px);
+      line-height: 0.98;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+    }
+    .chapter-title em { font-style: italic; color: var(--gri-deschis); }
+    .chapter-desc {
+      font-size: 15px;
+      color: var(--gri-deschis);
+      max-width: 380px;
+      margin-bottom: 36px;
+      line-height: 1.8;
+    }
+    .chapter-specs {
+      list-style: none;
+      border-top: 1px solid var(--linie);
+      padding-top: 24px;
+    }
+    .chapter-specs li {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gri);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--linie);
+    }
+    .chapter-specs li span:last-child { color: var(--alb); }
+
+    .chapter-visual {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .chapter.reverse .chapter-visual { order: 1; }
+    .chapter-visual img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) contrast(1.05) brightness(0.82);
+      transition: transform 1.2s cubic-bezier(0.22,1,0.36,1);
+    }
+    .chapter-visual.warm img { filter: contrast(1.05) brightness(0.85) saturate(0.7); }
+
+    .chapter-visual .vis-label {
+      position: absolute;
+      top: 40px; right: 40px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(245,244,241,0.7);
+      text-align: right;
+    }
+
+    /* =========================================================
+       SECȚIUNE INTRO / MANIFESTO
+    ========================================================= */
+    .manifesto {
+      padding: 200px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .manifesto-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 40px;
+    }
+    .manifesto-text {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(28px, 4vw, 56px);
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+    .manifesto-text em { font-style: italic; color: var(--gri-deschis); }
+
+    /* =========================================================
+       SERVICII — listă editorială
+    ========================================================= */
+    .services {
+      padding: 120px 48px 160px;
+      border-top: 1px solid var(--linie);
+    }
+    .services-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 80px;
+    }
+    .services-head h2 {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(32px, 4vw, 64px);
+      letter-spacing: -0.02em;
+    }
+    .services-head .count {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gri);
+      text-transform: uppercase;
+    }
+    .service-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 2fr 120px;
+      gap: 40px;
+      align-items: center;
+      padding: 40px 0;
+      border-top: 1px solid var(--linie);
+      cursor: pointer;
+      transition: padding .5s cubic-bezier(0.22,1,0.36,1);
+    }
+    .service-row:last-child { border-bottom: 1px solid var(--linie); }
+    .service-row:hover { padding-left: 24px; }
+    .service-row:hover .service-name { color: var(--alb-pur); }
+    .service-num {
+      font-size: 12px;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .service-name {
+      font-family: var(--serif);
+      font-size: clamp(28px, 3vw, 44px);
+      font-weight: 300;
+      color: var(--gri-deschis);
+      transition: color .4s ease;
+    }
+    .service-desc {
+      font-size: 14px;
+      color: var(--gri);
+      max-width: 360px;
+    }
+    .service-arrow {
+      text-align: right;
+      font-size: 20px;
+      color: var(--gri);
+      transition: transform .4s ease, color .4s ease;
+    }
+    .service-row:hover .service-arrow {
+      transform: translateX(8px);
+      color: var(--alb-pur);
+    }
+
+    /* =========================================================
+       STATISTICI
+    ========================================================= */
+    .stats {
+      padding: 140px 48px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      border-top: 1px solid var(--linie);
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-num {
+      font-family: var(--serif);
+      font-size: clamp(48px, 7vw, 100px);
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gri);
+      margin-top: 16px;
+    }
+
+    /* =========================================================
+       CTA / CONTACT
+    ========================================================= */
+    .cta {
+      padding: 200px 48px;
+      text-align: center;
+      position: relative;
+      border-top: 1px solid var(--linie);
+    }
+    .cta h2 {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(48px, 9vw, 140px);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin-bottom: 60px;
+    }
+    .cta h2 em { font-style: italic; color: var(--gri-deschis); }
+    .cta-btn {
+      display: inline-block;
+      padding: 22px 60px;
+      border: 1px solid var(--alb);
+      color: var(--alb);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      border-radius: 100px;
+      transition: all .5s cubic-bezier(0.22,1,0.36,1);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-btn span { position: relative; z-index: 2; transition: color .5s; }
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--alb);
+      transform: translateY(101%);
+      transition: transform .5s cubic-bezier(0.22,1,0.36,1);
+    }
+    .cta-btn:hover::before { transform: translateY(0); }
+    .cta-btn:hover span { color: var(--negru); }
+
+    /* =========================================================
+       FOOTER
+    ========================================================= */
+    footer {
+      padding: 80px 48px 48px;
+      border-top: 1px solid var(--linie);
+    }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 80px;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+    .footer-logo {
+      font-family: var(--sans-exp);
+      font-size: 48px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .footer-logo span { font-weight: 300; color: var(--gri); }
+    .footer-cols {
+      display: flex;
+      gap: 80px;
+    }
+    .footer-col h4 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gri);
+      margin-bottom: 20px;
+      font-weight: 400;
+    }
+    .footer-col a {
+      display: block;
+      color: var(--alb);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 6px 0;
+      transition: color .3s, padding-left .3s;
+    }
+    .footer-col a:hover { color: var(--gri-deschis); padding-left: 8px; }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 32px;
+      border-top: 1px solid var(--linie);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--gri);
+      text-transform: uppercase;
+    }
+
+    /* =========================================================
+       SCROLL REVEAL
+    ========================================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1.2s cubic-bezier(0.22,1,0.36,1),
+                  transform 1.2s cubic-bezier(0.22,1,0.36,1);
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* Reveal pe litere pentru titluri mari */
+    .char-reveal { display: inline-block; overflow: hidden; }
+    .char-reveal span {
+      display: inline-block;
+      transform: translateY(100%);
+      transition: transform 1s cubic-bezier(0.22,1,0.36,1);
+    }
+    .char-reveal.in span { transform: translateY(0); }
+
+    /* =========================================================
+       PROGRESS BAR (scroll)
+    ========================================================= */
+    .progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: var(--accent);
+      z-index: 1001;
+      width: 0%;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+    @media (max-width: 900px) {
+      header { padding: 24px; mix-blend-mode: difference; }
+      header.scrolled { padding: 16px 24px; }
+      nav.main-nav {
+        position: fixed;
+        inset: 0;
+        background: var(--negru);
+        flex-direction: column;
+        justify-content: center;
+        gap: 32px;
+        transform: translateX(100%);
+        transition: transform .6s cubic-bezier(0.76,0,0.24,1);
+        mix-blend-mode: normal;
+      }
+      nav.main-nav.open { transform: translateX(0); }
+      nav.main-nav a { font-size: 18px; }
+      .nav-index { display: none; }
+      .menu-toggle {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 1100;
+      }
+      .menu-toggle span {
+        width: 26px; height: 1.5px;
+        background: var(--alb-pur);
+        transition: all .4s;
+      }
+      .menu-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+      .menu-toggle.open span:nth-child(2) { opacity: 0; }
+      .menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+      .hero-content { flex-direction: column; align-items: flex-start; gap: 30px; padding: 0 24px 60px; }
+      .hero-title { max-width: 100%; }
+      .hero-meta { text-align: left; }
+      .hero-tag { left: 24px; }
+
+      .chapter, .chapter.reverse { grid-template-columns: 1fr; }
+      .chapter-text { padding: 60px 24px; order: 2 !important; }
+      .chapter-visual { height: 70vh; order: 1 !important; }
+
+      .services, .stats, .cta, footer { padding-left: 24px; padding-right: 24px; }
+      .service-row { grid-template-columns: 40px 1fr; gap: 16px; }
+      .service-desc, .service-arrow { display: none; }
+      .stats { grid-template-columns: 1fr 1fr; gap: 60px 20px; }
+      .manifesto { padding: 120px 24px; }
+      .footer-top { flex-direction: column; }
+      .footer-cols { flex-wrap: wrap; gap: 40px; }
+      .footer-bottom { flex-direction: column; gap: 12px; }
+      .cursor { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor custom -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- Progress bar -->
+  <div class="progress" id="progress"></div>
+
+  <!-- ===================== NAVIGARE ===================== -->
+  <header id="header">
+    <a href="#" class="logo">Forge<span>.</span></a>
+    <nav class="main-nav" id="nav">
+      <a href="#work">Proiecte</a>
+      <a href="#servicii">Servicii</a>
+      <a href="#despre">Studio</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="nav-index" id="navIndex">© MMXXVI</div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Meniu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="hero-bg" id="heroBg">
+      <img src="images/scene-hero.jpg" alt="Forge Studio"/>
+    </div>
+    <div class="hero-tag reveal">Studio de Marketing & Producție — Est. 2026</div>
+    <div class="hero-content">
+      <h1 class="hero-title" id="heroTitle">Construim<br/>brand-uri care<br/><em>rămân.</em></h1>
+      <div class="hero-meta reveal reveal-delay-2">
+        Web · Branding<br/>
+        Performance Ads<br/>
+        Producție Video<br/>
+        Social Media
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="line"></div>
+    </div>
+  </section>
+
+  <!-- ===================== MANIFESTO ===================== -->
+  <section class="manifesto">
+    <div class="manifesto-label reveal">Filozofia noastră</div>
+    <p class="manifesto-text reveal reveal-delay-1">
+      Nu facem doar site-uri și reclame. Construim <em>sisteme de creștere</em> — fiecare pixel, fiecare cadru și fiecare campanie gândite să transforme atenția în <em>clienți reali.</em>
+    </p>
+  </section>
+
+  <!-- ===================== WORK / PROIECTE ===================== -->
+  <div id="work"></div>
+
+  <!-- Capitol 01 -->
+  <section class="chapter">
+    <div class="chapter-text">
+      <div class="chapter-index reveal">IW 01 — Web Design</div>
+      <h2 class="chapter-title reveal reveal-delay-1">Identitate<br/><em>digitală</em></h2>
+      <p class="chapter-desc reveal reveal-delay-2">Site-uri care nu doar arată bine — convertesc. Construite pentru viteză, claritate și conversie, fiecare detaliu servește un scop.</p>
+      <ul class="chapter-specs reveal reveal-delay-3">
+        <li><span>Design</span><span>UX / UI</span></li>
+        <li><span>Tehnologie</span><span>Web modern</span></li>
+        <li><span>Optimizare</span><span>SEO / Viteză</span></li>
+      </ul>
+    </div>
+    <div class="chapter-visual">
+      <img src="images/scene-01.jpg" alt="Web design" data-parallax/>
+      <div class="vis-label">Fig. 01<br/>Digital Presence</div>
+    </div>
+  </section>
+
+  <!-- Capitol 02 -->
+  <section class="chapter reverse">
+    <div class="chapter-text">
+      <div class="chapter-index reveal">IW 02 — Producție Video</div>
+      <h2 class="chapter-title reveal reveal-delay-1">Cadre care<br/><em>vând</em></h2>
+      <p class="chapter-desc reveal reveal-delay-2">Filmare și fotografie de calitate cinematografică. Conținut vizual care oprește scroll-ul și construiește dorință.</p>
+      <ul class="chapter-specs reveal reveal-delay-3">
+        <li><span>Filmare</span><span>4K / Cinematic</span></li>
+        <li><span>Fotografie</span><span>Produs / Brand</span></li>
+        <li><span>Editare</span><span>Color grading</span></li>
+      </ul>
+    </div>
+    <div class="chapter-visual warm">
+      <img src="images/scene-02.jpg" alt="Producție video" data-parallax/>
+      <div class="vis-label">Fig. 02<br/>Motion & Frame</div>
+    </div>
+  </section>
+
+  <!-- Capitol 03 -->
+  <section class="chapter">
+    <div class="chapter-text">
+      <div class="chapter-index reveal">IW 03 — Performance</div>
+      <h2 class="chapter-title reveal reveal-delay-1">Campanii<br/>cu <em>rezultate</em></h2>
+      <p class="chapter-desc reveal reveal-delay-2">Google Ads și Meta gândite pentru ROI. Optimizăm bugetul, monitorizăm conversiile și raportăm transparent — fiecare leu lucrează.</p>
+      <ul class="chapter-specs reveal reveal-delay-3">
+        <li><span>Platforme</span><span>Google / Meta</span></li>
+        <li><span>Strategie</span><span>Funnel complet</span></li>
+        <li><span>Raportare</span><span>Transparentă</span></li>
+      </ul>
+    </div>
+    <div class="chapter-visual">
+      <img src="images/scene-03.jpg" alt="Performance marketing" data-parallax/>
+      <div class="vis-label">Fig. 03<br/>Growth Engine</div>
+    </div>
+  </section>
+
+  <!-- Capitol 04 -->
+  <section class="chapter reverse">
+    <div class="chapter-text">
+      <div class="chapter-index reveal">IW 04 — Social Media</div>
+      <h2 class="chapter-title reveal reveal-delay-1">Prezență<br/><em>constantă</em></h2>
+      <p class="chapter-desc reveal reveal-delay-2">Management complet de social media. Strategie de conținut, postări, community management — brand-ul tău, mereu activ.</p>
+      <ul class="chapter-specs reveal reveal-delay-3">
+        <li><span>Canale</span><span>IG / TikTok / FB</span></li>
+        <li><span>Conținut</span><span>Strategie lunară</span></li>
+        <li><span>Community</span><span>Management</span></li>
+      </ul>
+    </div>
+    <div class="chapter-visual">
+      <img src="images/scene-04.jpg" alt="Social media" data-parallax/>
+      <div class="vis-label">Fig. 04<br/>Always On</div>
+    </div>
+  </section>
+
+  <!-- ===================== SERVICII (listă) ===================== -->
+  <section class="services" id="servicii">
+    <div class="services-head">
+      <h2 class="reveal">Ce oferim</h2>
+      <span class="count reveal reveal-delay-1">05 servicii</span>
+    </div>
+
+    <div class="service-row reveal">
+      <span class="service-num">01</span>
+      <span class="service-name">Web Design</span>
+      <span class="service-desc">Site-uri profesionale, rapide și optimizate pentru conversie.</span>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row reveal">
+      <span class="service-num">02</span>
+      <span class="service-name">Mentenanță</span>
+      <span class="service-desc">Actualizări, backup-uri, securitate — site-ul mereu la zi.</span>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row reveal">
+      <span class="service-num">03</span>
+      <span class="service-name">Google Ads</span>
+      <span class="service-desc">Campanii Search, Display și YouTube care aduc clienți reali.</span>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row reveal">
+      <span class="service-num">04</span>
+      <span class="service-name">Social Media</span>
+      <span class="service-desc">Management complet pentru Facebook, Instagram și TikTok.</span>
+      <span class="service-arrow">→</span>
+    </div>
+    <div class="service-row reveal">
+      <span class="service-num">05</span>
+      <span class="service-name">Foto & Video</span>
+      <span class="service-desc">Producție vizuală de calitate cinematografică.</span>
+      <span class="service-arrow">→</span>
+    </div>
+  </section>
+
+  <!-- ===================== STATISTICI ===================== -->
+  <section class="stats" id="despre">
+    <div class="stat reveal">
+      <div class="stat-num" data-count="34">0</div>
+      <div class="stat-label">Clienți activi</div>
+    </div>
+    <div class="stat reveal reveal-delay-1">
+      <div class="stat-num" data-count="120">0</div>
+      <div class="stat-label">Proiecte livrate</div>
+    </div>
+    <div class="stat reveal reveal-delay-2">
+      <div class="stat-num" data-count="98">0</div>
+      <div class="stat-label">% Satisfacție</div>
+    </div>
+    <div class="stat reveal reveal-delay-3">
+      <div class="stat-num" data-count="5">0</div>
+      <div class="stat-label">Ani experiență</div>
+    </div>
+  </section>
+
+  <!-- ===================== CTA ===================== -->
+  <section class="cta" id="contact">
+    <h2 class="reveal">Hai să<br/><em>construim.</em></h2>
+    <a href="mailto:contact@forge.ro" class="cta-btn reveal reveal-delay-1" data-cursor><span>Începe un proiect</span></a>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-logo">Forge<span>.</span></div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Navigare</h4>
+          <a href="#work">Proiecte</a>
+          <a href="#servicii">Servicii</a>
+          <a href="#despre">Studio</a>
+        </div>
+        <div class="footer-col">
+          <h4>Social</h4>
+          <a href="#">Instagram</a>
+          <a href="#">Facebook</a>
+          <a href="#">LinkedIn</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <a href="mailto:contact@forge.ro">contact@forge.ro</a>
+          <a href="tel:+40700000000">+40 700 000 000</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© MMXXVI Forge Studio</span>
+      <span>București, România</span>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Custom cursor =====
+    const cursor = document.getElementById('cursor');
+    let mouseX = 0, mouseY = 0, curX = 0, curY = 0;
+    document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+    function animateCursor() {
+      curX += (mouseX - curX) * 0.18;
+      curY += (mouseY - curY) * 0.18;
+      cursor.style.left = curX + 'px';
+      cursor.style.top = curY + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+    document.querySelectorAll('a, button, [data-cursor], .service-row').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+    });
+
+    // ===== Header scrolled state =====
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ===== Progress bar =====
+    const progress = document.getElementById('progress');
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      progress.style.width = scrolled + '%';
+    });
+
+    // ===== Mobile menu =====
+    const menuToggle = document.getElementById('menuToggle');
+    const nav = document.getElementById('nav');
+    menuToggle.addEventListener('click', () => {
+      menuToggle.classList.toggle('open');
+      nav.classList.toggle('open');
+    });
+    nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      menuToggle.classList.remove('open');
+      nav.classList.remove('open');
+    }));
+
+    // ===== Scroll reveal =====
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.reveal, .char-reveal').forEach(el => revealObserver.observe(el));
+
+    // ===== Hero parallax (background moves slower) =====
+    const heroBg = document.getElementById('heroBg');
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      if (scrolled < window.innerHeight) {
+        heroBg.style.transform = `translateY(${scrolled * 0.4}px)`;
+      }
+    });
+
+    // ===== Parallax pe imaginile din capitole =====
+    const parallaxImgs = document.querySelectorAll('[data-parallax]');
+    window.addEventListener('scroll', () => {
+      parallaxImgs.forEach(img => {
+        const rect = img.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const offset = (center - window.innerHeight / 2) / window.innerHeight;
+        img.style.transform = `scale(1.15) translateY(${offset * -40}px)`;
+      });
+    });
+
+    // ===== Counter animation =====
+    const counters = document.querySelectorAll('[data-count]');
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.dataset.count);
+          let current = 0;
+          const step = target / 60;
+          const tick = () => {
+            current += step;
+            if (current < target) {
+              el.textContent = Math.floor(current);
+              requestAnimationFrame(tick);
+            } else {
+              el.textContent = target;
+            }
+          };
+          tick();
+          counterObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(c => counterObserver.observe(c));
+
+    // ===== Image fade-in =====
+    document.querySelectorAll('img').forEach(img => {
+      img.style.opacity = '0';
+      img.style.transition = 'opacity 1s ease';
+      if (img.complete) { img.style.opacity = '1'; }
+      else { img.addEventListener('load', () => img.style.opacity = '1'); }
+    });
+  </script>
+</body>
+</html>
