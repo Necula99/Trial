@@ -282,89 +282,162 @@
     }
 
     /* =========================================================
-       SECȚIUNI NARATIVE (work showcase) — full screen
+       SCROLL-DRIVEN GALLERY (proiecte) — experiență continuă
+       O scenă sticky pe tot ecranul; imaginile fac crossfade
+       pe măsură ce scrolezi. Fără cusături între secțiuni.
     ========================================================= */
-    .chapter {
+    .gallery {
       position: relative;
-      min-height: 100vh;
+      /* Înălțimea totală = nr capitole × 100vh. Dă spațiu de scroll. */
+      height: 400vh;
+    }
+    .gallery-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
       width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
       overflow: hidden;
     }
-    .chapter.reverse { grid-template-columns: 1fr 1fr; }
-
-    .chapter-text {
-      padding: 80px;
-      position: relative;
-      z-index: 2;
+    /* Stratul de imagini — toate stivuite, controlăm opacitatea din JS */
+    .gallery-layers {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
     }
-    .chapter.reverse .chapter-text { order: 2; }
+    .gallery-layer {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .gallery-layer.active { opacity: 1; }
+    .gallery-layer img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) contrast(1.08) brightness(0.62);
+      transform: scale(1.05);
+      will-change: transform;
+    }
+    .gallery-layer.warm img { filter: contrast(1.05) brightness(0.7) saturate(0.65); }
+    /* Overlay gradient peste imagini pentru lizibilitate text */
+    .gallery-layers::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: linear-gradient(105deg, rgba(12,12,13,0.85) 0%, rgba(12,12,13,0.4) 45%, transparent 75%);
+      pointer-events: none;
+    }
+    /* Vignette continuu */
+    .gallery-sticky::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      box-shadow: inset 0 0 200px 50px rgba(0,0,0,0.5);
+    }
 
-    .chapter-index {
+    /* Conținutul text — stivuit la fel, crossfade sincronizat */
+    .gallery-content {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      padding: 0 80px;
+    }
+    .gallery-panel {
+      position: absolute;
+      left: 80px;
+      max-width: 540px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity .8s ease, transform .8s ease;
+      pointer-events: none;
+    }
+    .gallery-panel.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .gallery-index {
       font-size: 11px;
       letter-spacing: 3px;
       color: var(--accent);
       margin-bottom: 24px;
       font-variant-numeric: tabular-nums;
     }
-    .chapter-title {
+    .gallery-title {
       font-family: var(--serif);
       font-weight: 300;
-      font-size: clamp(40px, 5.5vw, 88px);
-      line-height: 0.98;
+      font-size: clamp(44px, 6.5vw, 110px);
+      line-height: 0.96;
       letter-spacing: -0.02em;
       margin-bottom: 28px;
     }
-    .chapter-title em { font-style: italic; color: var(--gri-deschis); }
-    .chapter-desc {
+    .gallery-title em { font-style: italic; color: var(--gri-deschis); }
+    .gallery-desc {
       font-size: 15px;
       color: var(--gri-deschis);
-      max-width: 380px;
+      max-width: 400px;
       margin-bottom: 36px;
       line-height: 1.8;
     }
-    .chapter-specs {
+    .gallery-specs {
       list-style: none;
       border-top: 1px solid var(--linie);
-      padding-top: 24px;
+      max-width: 420px;
     }
-    .chapter-specs li {
+    .gallery-specs li {
       font-size: 11px;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--gri);
-      padding: 8px 0;
+      padding: 10px 0;
       display: flex;
       justify-content: space-between;
       border-bottom: 1px solid var(--linie);
     }
-    .chapter-specs li span:last-child { color: var(--alb); }
+    .gallery-specs li span:last-child { color: var(--alb); }
 
-    .chapter-visual {
-      position: relative;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .chapter.reverse .chapter-visual { order: 1; }
-    .chapter-visual img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      filter: grayscale(1) contrast(1.05) brightness(0.82);
-      transition: transform 1.2s cubic-bezier(0.22,1,0.36,1);
-    }
-    .chapter-visual.warm img { filter: contrast(1.05) brightness(0.85) saturate(0.7); }
-
-    .chapter-visual .vis-label {
+    /* Eticheta Fig. (dreapta sus) — se schimbă și ea */
+    .gallery-fig {
       position: absolute;
-      top: 40px; right: 40px;
+      top: 120px; right: 48px;
+      z-index: 4;
       font-size: 10px;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(245,244,241,0.7);
+      color: rgba(245,244,241,0.6);
       text-align: right;
     }
+    /* Indicator progres capitole (dreapta jos) */
+    .gallery-dots {
+      position: absolute;
+      bottom: 60px; right: 48px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: flex-end;
+    }
+    .gallery-dots .dot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--gri);
+      transition: color .4s;
+    }
+    .gallery-dots .dot .bar {
+      width: 24px; height: 1px;
+      background: var(--gri);
+      transition: width .4s, background .4s;
+    }
+    .gallery-dots .dot.active { color: var(--alb); }
+    .gallery-dots .dot.active .bar { width: 48px; background: var(--accent); }
 
     /* =========================================================
        SECȚIUNE INTRO / MANIFESTO
@@ -392,82 +465,167 @@
     .manifesto-text em { font-style: italic; color: var(--gri-deschis); }
 
     /* =========================================================
-       SERVICII — listă editorială
+       SERVICII — galerie sticky scroll-linked (ca proiectele)
+       Fiecare serviciu = o scenă prin care treci continuu.
     ========================================================= */
-    .services {
-      padding: 120px 48px 160px;
-      border-top: 1px solid var(--linie);
+    .svc-gallery {
+      position: relative;
+      height: 500vh; /* 5 servicii × 100vh */
     }
-    .services-head {
+    .svc-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
       display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 80px;
-    }
-    .services-head h2 {
-      font-family: var(--serif);
-      font-weight: 300;
-      font-size: clamp(32px, 4vw, 64px);
-      letter-spacing: -0.02em;
-    }
-    .services-head .count {
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: var(--gri);
-      text-transform: uppercase;
-    }
-    .service-row {
-      display: grid;
-      grid-template-columns: 80px 1fr 2fr 120px;
-      gap: 40px;
       align-items: center;
-      padding: 40px 0;
-      border-top: 1px solid var(--linie);
-      cursor: pointer;
-      transition: padding .5s cubic-bezier(0.22,1,0.36,1);
     }
-    .service-row:last-child { border-bottom: 1px solid var(--linie); }
-    .service-row:hover { padding-left: 24px; }
-    .service-row:hover .service-name { color: var(--alb-pur); }
-    .service-num {
-      font-size: 12px;
+    .svc-layers {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+    .svc-layer {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .svc-layer.active { opacity: 1; }
+    .svc-layer img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) contrast(1.08) brightness(0.45);
+      transform: scale(1.05);
+      will-change: transform;
+    }
+    .svc-layer.warm img { filter: contrast(1.05) brightness(0.5) saturate(0.6); }
+    .svc-layers::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: linear-gradient(to right, rgba(12,12,13,0.8) 0%, rgba(12,12,13,0.3) 50%, rgba(12,12,13,0.7) 100%);
+    }
+    .svc-sticky::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      box-shadow: inset 0 0 200px 50px rgba(0,0,0,0.5);
+    }
+    .svc-stage {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      padding: 0 48px;
+      text-align: center;
+    }
+    .svc-eyebrow {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
       color: var(--accent);
-      font-variant-numeric: tabular-nums;
+      margin-bottom: 30px;
     }
-    .service-name {
+    .svc-panel {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) translateY(40px);
+      width: 100%;
+      max-width: 900px;
+      opacity: 0;
+      transition: opacity .8s ease, transform .8s ease;
+      pointer-events: none;
+    }
+    .svc-panel.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateY(0);
+      pointer-events: auto;
+    }
+    .svc-panel .num {
       font-family: var(--serif);
-      font-size: clamp(28px, 3vw, 44px);
+      font-size: 18px;
+      font-style: italic;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .svc-panel h3 {
+      font-family: var(--serif);
       font-weight: 300;
+      font-size: clamp(48px, 8vw, 130px);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 30px;
+    }
+    .svc-panel p {
+      font-size: 16px;
       color: var(--gri-deschis);
-      transition: color .4s ease;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.8;
     }
-    .service-desc {
-      font-size: 14px;
+    /* Titlul fix "Ce oferim" sus */
+    .svc-header {
+      position: absolute;
+      top: 120px; left: 0; right: 0;
+      z-index: 4;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
       color: var(--gri);
-      max-width: 360px;
     }
-    .service-arrow {
-      text-align: right;
-      font-size: 20px;
-      color: var(--gri);
-      transition: transform .4s ease, color .4s ease;
+    .svc-dots {
+      position: absolute;
+      bottom: 60px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      display: flex;
+      gap: 12px;
     }
-    .service-row:hover .service-arrow {
-      transform: translateX(8px);
-      color: var(--alb-pur);
+    .svc-dots .d {
+      width: 32px; height: 2px;
+      background: var(--gri);
+      opacity: 0.4;
+      transition: opacity .4s, background .4s;
     }
+    .svc-dots .d.active { opacity: 1; background: var(--accent); }
 
     /* =========================================================
-       STATISTICI
+       STATISTICI — cu fundal parallax continuu
     ========================================================= */
     .stats {
-      padding: 140px 48px;
+      position: relative;
+      padding: 180px 48px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 40px;
-      border-top: 1px solid var(--linie);
+      overflow: hidden;
+    }
+    .stats-bg {
+      position: absolute;
+      inset: -10%;
+      z-index: 0;
+    }
+    .stats-bg img {
+      width: 100%; height: 120%;
+      object-fit: cover;
+      filter: grayscale(1) contrast(1.1) brightness(0.35);
+      will-change: transform;
+    }
+    .stats-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(12,12,13,0.55);
     }
     .stat {
+      position: relative;
+      z-index: 2;
       text-align: center;
     }
     .stat-num {
@@ -736,78 +894,77 @@
     </p>
   </section>
 
-  <!-- ===================== WORK / PROIECTE ===================== -->
+  <!-- ===================== WORK / PROIECTE — galerie continuă ===================== -->
   <div id="work"></div>
+  <section class="gallery" id="gallery">
+    <div class="gallery-sticky">
 
-  <!-- Capitol 01 -->
-  <section class="chapter">
-    <div class="chapter-text">
-      <div class="chapter-index reveal">IW 01 — Web Design</div>
-      <h2 class="chapter-title reveal reveal-delay-1">Identitate<br/><em>digitală</em></h2>
-      <p class="chapter-desc reveal reveal-delay-2">Site-uri care nu doar arată bine — convertesc. Construite pentru viteză, claritate și conversie, fiecare detaliu servește un scop.</p>
-      <ul class="chapter-specs reveal reveal-delay-3">
-        <li><span>Design</span><span>UX / UI</span></li>
-        <li><span>Tehnologie</span><span>Web modern</span></li>
-        <li><span>Optimizare</span><span>SEO / Viteză</span></li>
-      </ul>
-    </div>
-    <div class="chapter-visual">
-      <img src="images/scene-01.jpg" alt="Web design" data-parallax/>
-      <div class="vis-label">Fig. 01<br/>Digital Presence</div>
-    </div>
-  </section>
+      <!-- Straturi de imagini (crossfade la scroll) -->
+      <div class="gallery-layers">
+        <div class="gallery-layer active" data-layer="0"><img src="images/scene-01.jpg" alt="Web design"/></div>
+        <div class="gallery-layer warm" data-layer="1"><img src="images/scene-02.jpg" alt="Producție video"/></div>
+        <div class="gallery-layer" data-layer="2"><img src="images/scene-03.jpg" alt="Performance marketing"/></div>
+        <div class="gallery-layer" data-layer="3"><img src="images/scene-04.jpg" alt="Social media"/></div>
+      </div>
 
-  <!-- Capitol 02 -->
-  <section class="chapter reverse">
-    <div class="chapter-text">
-      <div class="chapter-index reveal">IW 02 — Producție Video</div>
-      <h2 class="chapter-title reveal reveal-delay-1">Cadre care<br/><em>vând</em></h2>
-      <p class="chapter-desc reveal reveal-delay-2">Filmare și fotografie de calitate cinematografică. Conținut vizual care oprește scroll-ul și construiește dorință.</p>
-      <ul class="chapter-specs reveal reveal-delay-3">
-        <li><span>Filmare</span><span>4K / Cinematic</span></li>
-        <li><span>Fotografie</span><span>Produs / Brand</span></li>
-        <li><span>Editare</span><span>Color grading</span></li>
-      </ul>
-    </div>
-    <div class="chapter-visual warm">
-      <img src="images/scene-02.jpg" alt="Producție video" data-parallax/>
-      <div class="vis-label">Fig. 02<br/>Motion & Frame</div>
-    </div>
-  </section>
+      <!-- Eticheta Fig (se schimbă cu fiecare capitol) -->
+      <div class="gallery-fig" id="galleryFig">Fig. 01<br/>Digital Presence</div>
 
-  <!-- Capitol 03 -->
-  <section class="chapter">
-    <div class="chapter-text">
-      <div class="chapter-index reveal">IW 03 — Performance</div>
-      <h2 class="chapter-title reveal reveal-delay-1">Campanii<br/>cu <em>rezultate</em></h2>
-      <p class="chapter-desc reveal reveal-delay-2">Google Ads și Meta gândite pentru ROI. Optimizăm bugetul, monitorizăm conversiile și raportăm transparent — fiecare leu lucrează.</p>
-      <ul class="chapter-specs reveal reveal-delay-3">
-        <li><span>Platforme</span><span>Google / Meta</span></li>
-        <li><span>Strategie</span><span>Funnel complet</span></li>
-        <li><span>Raportare</span><span>Transparentă</span></li>
-      </ul>
-    </div>
-    <div class="chapter-visual">
-      <img src="images/scene-03.jpg" alt="Performance marketing" data-parallax/>
-      <div class="vis-label">Fig. 03<br/>Growth Engine</div>
-    </div>
-  </section>
+      <!-- Panouri de text (crossfade sincronizat cu imaginile) -->
+      <div class="gallery-content">
+        <div class="gallery-panel active" data-panel="0">
+          <div class="gallery-index">IW 01 — Web Design</div>
+          <h2 class="gallery-title">Identitate<br/><em>digitală</em></h2>
+          <p class="gallery-desc">Site-uri care nu doar arată bine — convertesc. Construite pentru viteză, claritate și conversie, fiecare detaliu servește un scop.</p>
+          <ul class="gallery-specs">
+            <li><span>Design</span><span>UX / UI</span></li>
+            <li><span>Tehnologie</span><span>Web modern</span></li>
+            <li><span>Optimizare</span><span>SEO / Viteză</span></li>
+          </ul>
+        </div>
 
-  <!-- Capitol 04 -->
-  <section class="chapter reverse">
-    <div class="chapter-text">
-      <div class="chapter-index reveal">IW 04 — Social Media</div>
-      <h2 class="chapter-title reveal reveal-delay-1">Prezență<br/><em>constantă</em></h2>
-      <p class="chapter-desc reveal reveal-delay-2">Management complet de social media. Strategie de conținut, postări, community management — brand-ul tău, mereu activ.</p>
-      <ul class="chapter-specs reveal reveal-delay-3">
-        <li><span>Canale</span><span>IG / TikTok / FB</span></li>
-        <li><span>Conținut</span><span>Strategie lunară</span></li>
-        <li><span>Community</span><span>Management</span></li>
-      </ul>
-    </div>
-    <div class="chapter-visual">
-      <img src="images/scene-04.jpg" alt="Social media" data-parallax/>
-      <div class="vis-label">Fig. 04<br/>Always On</div>
+        <div class="gallery-panel" data-panel="1">
+          <div class="gallery-index">IW 02 — Producție Video</div>
+          <h2 class="gallery-title">Cadre care<br/><em>vând</em></h2>
+          <p class="gallery-desc">Filmare și fotografie de calitate cinematografică. Conținut vizual care oprește scroll-ul și construiește dorință.</p>
+          <ul class="gallery-specs">
+            <li><span>Filmare</span><span>4K / Cinematic</span></li>
+            <li><span>Fotografie</span><span>Produs / Brand</span></li>
+            <li><span>Editare</span><span>Color grading</span></li>
+          </ul>
+        </div>
+
+        <div class="gallery-panel" data-panel="2">
+          <div class="gallery-index">IW 03 — Performance</div>
+          <h2 class="gallery-title">Campanii cu<br/><em>rezultate</em></h2>
+          <p class="gallery-desc">Google Ads și Meta gândite pentru ROI. Optimizăm bugetul, monitorizăm conversiile și raportăm transparent — fiecare leu lucrează.</p>
+          <ul class="gallery-specs">
+            <li><span>Platforme</span><span>Google / Meta</span></li>
+            <li><span>Strategie</span><span>Funnel complet</span></li>
+            <li><span>Raportare</span><span>Transparentă</span></li>
+          </ul>
+        </div>
+
+        <div class="gallery-panel" data-panel="3">
+          <div class="gallery-index">IW 04 — Social Media</div>
+          <h2 class="gallery-title">Prezență<br/><em>constantă</em></h2>
+          <p class="gallery-desc">Management complet de social media. Strategie de conținut, postări, community management — brand-ul tău, mereu activ.</p>
+          <ul class="gallery-specs">
+            <li><span>Canale</span><span>IG / TikTok / FB</span></li>
+            <li><span>Conținut</span><span>Strategie lunară</span></li>
+            <li><span>Community</span><span>Management</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Indicator capitole -->
+      <div class="gallery-dots" id="galleryDots">
+        <div class="dot active" data-dot="0"><span>Web</span><span class="bar"></span></div>
+        <div class="dot" data-dot="1"><span>Video</span><span class="bar"></span></div>
+        <div class="dot" data-dot="2"><span>Ads</span><span class="bar"></span></div>
+        <div class="dot" data-dot="3"><span>Social</span><span class="bar"></span></div>
+      </div>
+
     </div>
   </section>
 
@@ -981,16 +1138,66 @@
       }
     });
 
-    // ===== Parallax pe imaginile din capitole =====
-    const parallaxImgs = document.querySelectorAll('[data-parallax]');
-    window.addEventListener('scroll', () => {
-      parallaxImgs.forEach(img => {
-        const rect = img.getBoundingClientRect();
-        const center = rect.top + rect.height / 2;
-        const offset = (center - window.innerHeight / 2) / window.innerHeight;
-        img.style.transform = `scale(1.15) translateY(${offset * -40}px)`;
-      });
-    });
+    // ===== GALERIE SCROLL-LINKED =====
+    // Poziția scroll-ului controlează DIRECT mișcarea — ca un dolly shot.
+    // Pe măsură ce scrolezi prin secțiunea sticky, imaginea face zoom/pan
+    // continuu, iar la praguri schimbă scena (crossfade). O singură
+    // călătorie vizuală neîntreruptă, exact ca în referință.
+    const gallery = document.getElementById('gallery');
+    const layers = document.querySelectorAll('.gallery-layer');
+    const panels = document.querySelectorAll('.gallery-panel');
+    const dots = document.querySelectorAll('.gallery-dots .dot');
+    const galleryFig = document.getElementById('galleryFig');
+    const figLabels = [
+      'Fig. 01<br/>Digital Presence',
+      'Fig. 02<br/>Motion & Frame',
+      'Fig. 03<br/>Growth Engine',
+      'Fig. 04<br/>Always On'
+    ];
+    const N = layers.length; // 4 scene
+    let currentScene = -1;
+
+    function updateGallery() {
+      const rect = gallery.getBoundingClientRect();
+      const total = gallery.offsetHeight - window.innerHeight;
+      // progres 0 → 1 prin toată galeria
+      let p = (-rect.top) / total;
+      p = Math.max(0, Math.min(1, p));
+
+      // Care scenă suntem (0..N-1)
+      const scenePos = p * N;            // ex: 1.6 = scena 1, 60% prin ea
+      const sceneIdx = Math.min(N - 1, Math.floor(scenePos));
+      const within = scenePos - sceneIdx; // 0→1 progres în scena curentă
+
+      // Schimbă scena activă (text + imagine) la prag
+      if (sceneIdx !== currentScene) {
+        currentScene = sceneIdx;
+        layers.forEach((l, i) => l.classList.toggle('active', i === sceneIdx));
+        panels.forEach((pn, i) => pn.classList.toggle('active', i === sceneIdx));
+        dots.forEach((d, i) => d.classList.toggle('active', i === sceneIdx));
+        galleryFig.innerHTML = figLabels[sceneIdx];
+      }
+
+      // MIȘCARE CONTINUĂ: imaginea activă face zoom + pan legat de scroll.
+      // Asta dă senzația că "avansezi prin" imagine, nu că o privești static.
+      const activeImg = layers[sceneIdx].querySelector('img');
+      if (activeImg) {
+        const scale = 1.05 + within * 0.18;      // zoom 1.05 → 1.23
+        const tx = within * -4;                  // pan orizontal subtil
+        const ty = within * -3;                  // pan vertical subtil
+        activeImg.style.transform = `scale(${scale}) translate(${tx}%, ${ty}%)`;
+      }
+
+      // Textul scenei curente glisează ușor în sus pe măsură ce avansezi
+      const activePanel = panels[sceneIdx];
+      if (activePanel) {
+        activePanel.style.transform = `translateY(${within * -30}px)`;
+      }
+    }
+
+    window.addEventListener('scroll', updateGallery, { passive: true });
+    window.addEventListener('resize', updateGallery);
+    updateGallery();
 
     // ===== Counter animation =====
     const counters = document.querySelectorAll('[data-count]');
