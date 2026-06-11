@@ -13,6 +13,9 @@
   <!-- Preload imagine hero -->
   <link rel="preload" as="image" href="images/scene-hero.jpg"/>
 
+  <!-- Motion animation library -->
+  <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
+
   <style>
     /* =========================================================
        FORGE — CINEMATIC EDITION
@@ -1094,18 +1097,19 @@
   </footer>
 
   <script>
+    const { animate, scroll, inView, stagger } = Motion;
+
     // ===== Custom cursor =====
     const cursor = document.getElementById('cursor');
     let mouseX = 0, mouseY = 0, curX = 0, curY = 0;
     document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
-    function animateCursor() {
+    (function loop() {
       curX += (mouseX - curX) * 0.18;
       curY += (mouseY - curY) * 0.18;
       cursor.style.left = curX + 'px';
       cursor.style.top = curY + 'px';
-      requestAnimationFrame(animateCursor);
-    }
-    animateCursor();
+      requestAnimationFrame(loop);
+    })();
     document.querySelectorAll('a, button, [data-cursor]').forEach(el => {
       el.addEventListener('mouseenter', () => cursor.classList.add('big'));
       el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
@@ -1113,17 +1117,10 @@
 
     // ===== Header scrolled state =====
     const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-      header.classList.toggle('scrolled', window.scrollY > 60);
-    });
+    window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 60));
 
-    // ===== Progress bar =====
-    const progress = document.getElementById('progress');
-    window.addEventListener('scroll', () => {
-      const h = document.documentElement;
-      const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
-      progress.style.width = scrolled + '%';
-    });
+    // ===== Progress bar — scroll-driven =====
+    scroll(animate('#progress', { width: ['0%', '100%'] }, { ease: 'linear' }));
 
     // ===== Mobile menu =====
     const menuToggle = document.getElementById('menuToggle');
@@ -1138,45 +1135,38 @@
     }));
 
     // ===== Scroll reveal =====
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-        }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-    document.querySelectorAll('.reveal, .char-reveal').forEach(el => revealObserver.observe(el));
+    inView('.reveal', ({ target }) => {
+      const delay = target.classList.contains('reveal-delay-3') ? 0.3
+                  : target.classList.contains('reveal-delay-2') ? 0.2
+                  : target.classList.contains('reveal-delay-1') ? 0.1 : 0;
+      animate(target, { opacity: 1, transform: 'translateY(0px)' },
+        { duration: 1.2, delay, ease: [0.22, 1, 0.36, 1] });
+    }, { amount: 0.1 });
 
-    // ===== Hero title reveal la încărcare =====
+    // ===== Hero title reveal =====
     window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('heroTitle').classList.add('in');
-      }, 200);
+      animate(
+        document.querySelectorAll('#heroTitle .line-wrap span'),
+        { transform: ['translateY(110%)', 'translateY(0%)'] },
+        { duration: 1.4, delay: stagger(0.15, { start: 0.3 }), ease: [0.16, 1, 0.3, 1] }
+      );
     });
 
-    // ===== Hero parallax (background moves slower + se estompează) =====
+    // ===== Hero parallax — scroll-driven =====
     const heroBg = document.getElementById('heroBg');
     const heroContent = document.querySelector('.hero-content');
-    window.addEventListener('scroll', () => {
-      const scrolled = window.scrollY;
-      if (scrolled < window.innerHeight) {
-        // Background se mișcă lent (parallax adânc)
-        heroBg.style.transform = `translateY(${scrolled * 0.5}px)`;
-        // Textul se mișcă mai repede și se estompează (iese din scenă)
-        heroContent.style.transform = `translateY(${scrolled * -0.15}px)`;
-        heroContent.style.opacity = 1 - (scrolled / (window.innerHeight * 0.7));
-      }
-    });
+    scroll((p) => {
+      const vh = window.innerHeight;
+      heroBg.style.transform = `translateY(${p * vh * 0.5}px)`;
+      heroContent.style.transform = `translateY(${p * vh * -0.15}px)`;
+      heroContent.style.opacity = Math.max(0, 1 - p / 0.7);
+    }, { target: document.querySelector('.hero'), offset: ['start start', 'end start'] });
 
-    // ===== GALERIE SCROLL-LINKED =====
-    // Poziția scroll-ului controlează DIRECT mișcarea — ca un dolly shot.
-    // Pe măsură ce scrolezi prin secțiunea sticky, imaginea face zoom/pan
-    // continuu, iar la praguri schimbă scena (crossfade). O singură
-    // călătorie vizuală neîntreruptă, exact ca în referință.
+    // ===== Gallery scroll-linked =====
     const gallery = document.getElementById('gallery');
     const layers = document.querySelectorAll('.gallery-layer');
     const panels = document.querySelectorAll('.gallery-panel');
-    const dots = document.querySelectorAll('.gallery-dots .dot');
+    const gDots = document.querySelectorAll('.gallery-dots .dot');
     const galleryFig = document.getElementById('galleryFig');
     const figLabels = [
       'Fig. 01<br/>Digital Presence',
@@ -1184,65 +1174,40 @@
       'Fig. 03<br/>Growth Engine',
       'Fig. 04<br/>Always On'
     ];
-    const N = layers.length; // 4 scene
+    const N = layers.length;
     let currentScene = -1;
 
-    function updateGallery() {
-      const rect = gallery.getBoundingClientRect();
-      const total = gallery.offsetHeight - window.innerHeight;
-      // progres 0 → 1 prin toată galeria
-      let p = (-rect.top) / total;
-      p = Math.max(0, Math.min(1, p));
+    scroll((p) => {
+      const scenePos = p * N;
+      const idx = Math.min(N - 1, Math.floor(scenePos));
+      const within = scenePos - idx;
 
-      // Care scenă suntem (0..N-1)
-      const scenePos = p * N;            // ex: 1.6 = scena 1, 60% prin ea
-      const sceneIdx = Math.min(N - 1, Math.floor(scenePos));
-      const within = scenePos - sceneIdx; // 0→1 progres în scena curentă
-
-      // Schimbă scena activă (text + imagine) la prag
-      if (sceneIdx !== currentScene) {
-        currentScene = sceneIdx;
-        layers.forEach((l, i) => l.classList.toggle('active', i === sceneIdx));
-        panels.forEach((pn, i) => pn.classList.toggle('active', i === sceneIdx));
-        dots.forEach((d, i) => d.classList.toggle('active', i === sceneIdx));
-        galleryFig.innerHTML = figLabels[sceneIdx];
+      if (idx !== currentScene) {
+        currentScene = idx;
+        layers.forEach((l, i) => l.classList.toggle('active', i === idx));
+        panels.forEach((pn, i) => pn.classList.toggle('active', i === idx));
+        gDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        galleryFig.innerHTML = figLabels[idx];
       }
 
-      // MIȘCARE CONTINUĂ: imaginea activă face zoom + pan legat de scroll.
-      // Asta dă senzația că "avansezi prin" imagine, nu că o privești static.
-      const activeImg = layers[sceneIdx].querySelector('img');
-      if (activeImg) {
-        const scale = 1.05 + within * 0.18;      // zoom 1.05 → 1.23
-        const tx = within * -4;                  // pan orizontal subtil
-        const ty = within * -3;                  // pan vertical subtil
-        activeImg.style.transform = `scale(${scale}) translate(${tx}%, ${ty}%)`;
-      }
+      const img = layers[idx].querySelector('img');
+      if (img) img.style.transform = `scale(${1.05 + within * 0.18}) translate(${within * -4}%, ${within * -3}%)`;
 
-      // Textul scenei curente glisează ușor în sus pe măsură ce avansezi
-      const activePanel = panels[sceneIdx];
-      if (activePanel) {
+      const activePanel = panels[idx];
+      if (activePanel && activePanel.classList.contains('active'))
         activePanel.style.transform = `translateY(${within * -30}px)`;
-      }
-    }
 
-    window.addEventListener('scroll', updateGallery, { passive: true });
-    window.addEventListener('resize', updateGallery);
-    updateGallery();
+    }, { target: gallery, offset: ['start start', 'end end'] });
 
-    // ===== GALERIE SERVICII — sticky scroll-linked =====
+    // ===== Services scroll-linked =====
     const svcGallery = document.getElementById('servicii');
     const svcLayers = document.querySelectorAll('.svc-layer');
     const svcPanels = document.querySelectorAll('.svc-panel');
-    const svcDots = document.querySelectorAll('.svc-dots .d');
+    const sDots = document.querySelectorAll('.svc-dots .d');
     const SN = svcLayers.length;
     let svcCurrent = -1;
 
-    function updateSvc() {
-      const rect = svcGallery.getBoundingClientRect();
-      const total = svcGallery.offsetHeight - window.innerHeight;
-      let p = (-rect.top) / total;
-      p = Math.max(0, Math.min(1, p));
-
+    scroll((p) => {
       const pos = p * SN;
       const idx = Math.min(SN - 1, Math.floor(pos));
       const within = pos - idx;
@@ -1251,69 +1216,42 @@
         svcCurrent = idx;
         svcLayers.forEach((l, i) => l.classList.toggle('active', i === idx));
         svcPanels.forEach((pn, i) => pn.classList.toggle('active', i === idx));
-        svcDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        sDots.forEach((d, i) => d.classList.toggle('active', i === idx));
       }
 
-      // Mișcare continuă fundal serviciu activ
       const img = svcLayers[idx].querySelector('img');
-      if (img) {
-        const scale = 1.05 + within * 0.16;
-        const tx = within * 3;
-        img.style.transform = `scale(${scale}) translateX(${tx}%)`;
-      }
-    }
-    window.addEventListener('scroll', updateSvc, { passive: true });
-    window.addEventListener('resize', updateSvc);
-    updateSvc();
+      if (img) img.style.transform = `scale(${1.05 + within * 0.16}) translateX(${within * 3}%)`;
 
-    // ===== Parallax fundal Statistici + CTA =====
-    const statsBg = document.getElementById('statsBg');
-    const ctaBg = document.getElementById('ctaBg');
-    function updateBgParallax() {
-      [statsBg, ctaBg].forEach(bg => {
-        if (!bg) return;
-        const rect = bg.closest('section').getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-          // cât de centrată e secțiunea în viewport (-1 .. 1)
-          const center = (rect.top + rect.height/2 - window.innerHeight/2) / window.innerHeight;
-          bg.style.transform = `translateY(${center * -60}px)`;
-        }
-      });
-    }
-    window.addEventListener('scroll', updateBgParallax, { passive: true });
-    updateBgParallax();
+    }, { target: svcGallery, offset: ['start start', 'end end'] });
+
+    // ===== Stats + CTA parallax — scroll-driven =====
+    document.querySelectorAll('.stats, .cta').forEach(section => {
+      const bg = section.querySelector('img');
+      if (!bg) return;
+      scroll(
+        animate(bg, { transform: ['translateY(-60px)', 'translateY(60px)'] }, { ease: 'linear' }),
+        { target: section, offset: ['start end', 'end start'] }
+      );
+    });
 
     // ===== Counter animation =====
-    const counters = document.querySelectorAll('[data-count]');
-    const counterObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const el = entry.target;
-          const target = parseInt(el.dataset.count);
-          let current = 0;
-          const step = target / 60;
-          const tick = () => {
-            current += step;
-            if (current < target) {
-              el.textContent = Math.floor(current);
-              requestAnimationFrame(tick);
-            } else {
-              el.textContent = target;
-            }
-          };
-          tick();
-          counterObserver.unobserve(el);
-        }
-      });
-    }, { threshold: 0.5 });
-    counters.forEach(c => counterObserver.observe(c));
+    inView('[data-count]', ({ target }) => {
+      const end = parseInt(target.dataset.count);
+      let t0 = null;
+      const ease = t => 1 - Math.pow(1 - t, 3);
+      (function tick(ts) {
+        if (!t0) t0 = ts;
+        const p = Math.min((ts - t0) / 2000, 1);
+        target.textContent = Math.round(ease(p) * end);
+        if (p < 1) requestAnimationFrame(tick);
+      })(performance.now());
+    }, { amount: 0.5 });
 
     // ===== Image fade-in =====
     document.querySelectorAll('img').forEach(img => {
       img.style.opacity = '0';
-      img.style.transition = 'opacity 1s ease';
-      if (img.complete) { img.style.opacity = '1'; }
-      else { img.addEventListener('load', () => img.style.opacity = '1'); }
+      const show = () => animate(img, { opacity: 1 }, { duration: 1, ease: 'easeOut' });
+      img.complete ? show() : img.addEventListener('load', show);
     });
   </script>
 </body>
