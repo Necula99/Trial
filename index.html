@@ -445,6 +445,8 @@
       letter-spacing: 1px;
       color: var(--gri);
       transition: color .4s;
+      cursor: pointer;
+      user-select: none;
     }
     .gallery-dots .dot .bar {
       width: 24px; height: 1px;
@@ -610,6 +612,7 @@
       background: var(--gri);
       opacity: 0.4;
       transition: opacity .4s, background .4s;
+      cursor: pointer;
     }
     .svc-dots .d.active { opacity: 1; background: var(--accent); }
 
@@ -1504,6 +1507,19 @@
 
     }, { target: gallery, offset: ['start start', 'end end'] });
 
+    // Gallery dots — click to jump to slide
+    gDots.forEach((dot, i) => {
+      dot.setAttribute('role', 'button');
+      dot.setAttribute('tabindex', '0');
+      const jumpGallery = () => {
+        const scrollRange = gallery.offsetHeight - window.innerHeight;
+        const target = gallery.offsetTop + (i / N) * scrollRange;
+        window.scrollTo({ top: target, behavior: 'smooth' });
+      };
+      dot.addEventListener('click', jumpGallery);
+      dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jumpGallery(); } });
+    });
+
     // ===== Services scroll-linked =====
     const svcGallery = document.getElementById('servicii');
     const svcLayers = document.querySelectorAll('.svc-layer');
@@ -1528,6 +1544,20 @@
       if (img) img.style.transform = `scale(${1.05 + within * 0.16}) translateX(${within * 3}%)`;
 
     }, { target: svcGallery, offset: ['start start', 'end end'] });
+
+    // Services dots — click to jump to slide
+    sDots.forEach((dot, i) => {
+      dot.setAttribute('role', 'button');
+      dot.setAttribute('tabindex', '0');
+      dot.setAttribute('aria-label', `Serviciu ${i + 1}`);
+      const jumpSvc = () => {
+        const scrollRange = svcGallery.offsetHeight - window.innerHeight;
+        const target = svcGallery.offsetTop + (i / SN) * scrollRange;
+        window.scrollTo({ top: target, behavior: 'smooth' });
+      };
+      dot.addEventListener('click', jumpSvc);
+      dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jumpSvc(); } });
+    });
 
     // ===== Stats + CTA parallax — scroll-driven =====
     document.querySelectorAll('.stats, .cta').forEach(section => {
