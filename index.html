@@ -96,7 +96,18 @@
       mix-blend-mode: difference;
       transition: padding .4s ease;
     }
-    header.scrolled { padding: 20px 48px; }
+    header.scrolled {
+      padding: 20px 48px;
+      background: rgba(12,12,13,0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      mix-blend-mode: normal;
+      border-bottom: 1px solid var(--linie);
+    }
+    header.scrolled .logo,
+    header.scrolled nav.main-nav a,
+    header.scrolled .nav-index { color: var(--alb); }
+    header.scrolled .menu-toggle span { background: var(--alb); }
 
     .logo {
       font-family: var(--sans-exp);
@@ -148,7 +159,8 @@
     ========================================================= */
     .hero {
       position: relative;
-      height: 100vh;
+      height: 100svh;
+      min-height: 100dvh;
       width: 100%;
       overflow: hidden;
       display: flex;
@@ -803,6 +815,207 @@
     }
 
     /* =========================================================
+       ACCESSIBILITY & GLOBAL POLISH
+    ========================================================= */
+
+    /* Skip to content */
+    .skip-link {
+      position: fixed;
+      top: -100%;
+      left: 24px;
+      z-index: 9999;
+      padding: 14px 28px;
+      background: var(--alb);
+      color: var(--negru);
+      font-family: var(--sans);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: top .2s ease;
+    }
+    .skip-link:focus { top: 24px; }
+
+    /* Focus rings — keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 1px;
+    }
+    :focus:not(:focus-visible) { outline: none; }
+
+    /* Cursor + touch on all interactive */
+    a, button, [role="button"], select { cursor: pointer; touch-action: manipulation; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Active nav link */
+    nav.main-nav a.active::after { width: 100%; }
+
+    /* Manifesto line-length control */
+    .manifesto-text { max-width: 820px; margin-left: auto; margin-right: auto; }
+
+    /* =========================================================
+       TESTIMONIALE
+    ========================================================= */
+    .testimoniale { padding: 180px 48px; }
+    .testimoniale-inner { max-width: 1280px; margin: 0 auto; }
+    .testimoniale-header { margin-bottom: 80px; }
+    .testimoniale-eyebrow {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    .testimoniale-title {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(36px, 4vw, 72px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+    .testimoniale-title em { font-style: italic; color: var(--gri-deschis); }
+    .testimoniale-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--linie);
+    }
+    .testimonial-card {
+      background: var(--negru);
+      padding: 52px 44px;
+      transition: background .5s ease;
+    }
+    .testimonial-card:hover { background: var(--negru2); }
+    .testimonial-mark {
+      font-family: var(--serif);
+      font-size: 80px;
+      line-height: 0.8;
+      color: var(--accent);
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+    .testimonial-text {
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--alb);
+      font-style: italic;
+      margin-bottom: 40px;
+    }
+    .testimonial-sep { width: 32px; height: 1px; background: var(--accent); margin-bottom: 28px; }
+    .testimonial-name {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--alb);
+      margin-bottom: 6px;
+    }
+    .testimonial-role {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gri);
+    }
+
+    /* =========================================================
+       CLIENȚI — logo strip
+    ========================================================= */
+    .clienti {
+      padding: 80px 48px;
+      border-top: 1px solid var(--linie);
+      border-bottom: 1px solid var(--linie);
+    }
+    .clienti-label {
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gri);
+      margin-bottom: 52px;
+    }
+    .clienti-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 72px;
+      flex-wrap: wrap;
+    }
+    .clienti-logo {
+      font-family: var(--sans-exp);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--alb);
+      opacity: 0.28;
+      transition: opacity .4s ease;
+    }
+    .clienti-logo:hover { opacity: 0.65; }
+
+    /* =========================================================
+       CONTACT FORM
+    ========================================================= */
+    .contact-wrap {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .contact-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 40px;
+      margin-top: 56px;
+      text-align: left;
+    }
+    .f-field { display: flex; flex-direction: column; gap: 10px; margin-bottom: 36px; }
+    .f-field.full { grid-column: 1 / -1; }
+    .f-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gri-deschis);
+    }
+    .f-input, .f-textarea, .f-select {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      color: var(--alb);
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 300;
+      padding: 12px 0;
+      outline: none;
+      transition: border-color .3s ease;
+      -webkit-appearance: none;
+      appearance: none;
+      min-height: 52px;
+      width: 100%;
+    }
+    .f-textarea { min-height: 96px; resize: none; }
+    .f-input:focus, .f-textarea:focus, .f-select:focus { border-bottom-color: var(--accent); }
+    .f-input::placeholder, .f-textarea::placeholder { color: rgba(154,154,159,0.5); }
+    .f-select option { background: var(--negru2); color: var(--alb); }
+    .f-submit { grid-column: 1 / -1; display: flex; justify-content: center; margin-top: 8px; }
+    .f-submit .cta-btn { min-width: 240px; }
+
+    /* CTA section padding increase for form */
+    .cta { padding: 160px 48px; }
+
+    /* =========================================================
        RESPONSIVE
     ========================================================= */
     @media (max-width: 900px) {
@@ -856,10 +1069,21 @@
       .footer-cols { flex-wrap: wrap; gap: 40px; }
       .footer-bottom { flex-direction: column; gap: 12px; }
       .cursor { display: none; }
+
+      .testimoniale { padding: 100px 24px; }
+      .testimoniale-grid { grid-template-columns: 1fr; }
+      .clienti { padding: 60px 24px; }
+      .clienti-logos { gap: 32px; }
+      .contact-form { grid-template-columns: 1fr; gap: 0; }
+      .f-field.full { grid-column: 1; }
+      .cta { padding: 120px 24px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Skip link — keyboard accessibility -->
+  <a href="#main-content" class="skip-link">Sari la conținut</a>
 
   <!-- Cursor custom -->
   <div class="cursor" id="cursor"></div>
@@ -877,13 +1101,13 @@
       <a href="#contact">Contact</a>
     </nav>
     <div class="nav-index" id="navIndex">© MMXXVI</div>
-    <button class="menu-toggle" id="menuToggle" aria-label="Meniu">
+    <button class="menu-toggle" id="menuToggle" aria-label="Meniu" aria-expanded="false" aria-controls="nav">
       <span></span><span></span><span></span>
     </button>
   </header>
 
   <!-- ===================== HERO ===================== -->
-  <section class="hero">
+  <section class="hero" id="main-content">
     <div class="hero-bg" id="heroBg">
       <img src="images/scene-hero.jpg" alt="Forge Studio"/>
     </div>
@@ -1038,9 +1262,54 @@
     </div>
   </section>
 
+  <!-- ===================== TESTIMONIALE ===================== -->
+  <section class="testimoniale">
+    <div class="testimoniale-inner">
+      <div class="testimoniale-header reveal">
+        <div class="testimoniale-eyebrow">Ce spun clienții</div>
+        <h2 class="testimoniale-title">Rezultate care<br/><em>vorbesc de la sine</em></h2>
+      </div>
+      <div class="testimoniale-grid">
+        <article class="testimonial-card reveal">
+          <div class="testimonial-mark">&ldquo;</div>
+          <p class="testimonial-text">Forge ne-a transformat complet prezența digitală. Site-ul nou a adus o creștere de 3× a conversiilor în primele două luni.</p>
+          <div class="testimonial-sep"></div>
+          <div class="testimonial-name">Andrei Moldovan</div>
+          <div class="testimonial-role">CEO, Moldovan Construct</div>
+        </article>
+        <article class="testimonial-card reveal reveal-delay-1">
+          <div class="testimonial-mark">&ldquo;</div>
+          <p class="testimonial-text">Campaniile de performance realizate de echipa Forge au generat un ROAS de 8x în sezonul de vârf. Profesionalism la fiecare pas.</p>
+          <div class="testimonial-sep"></div>
+          <div class="testimonial-name">Diana Rusu</div>
+          <div class="testimonial-role">Marketing Director, BeautyBox</div>
+        </article>
+        <article class="testimonial-card reveal reveal-delay-2">
+          <div class="testimonial-mark">&ldquo;</div>
+          <p class="testimonial-text">Producția video a depășit orice așteptări. Brandul nostru arată acum ca un jucător de top din industrie.</p>
+          <div class="testimonial-sep"></div>
+          <div class="testimonial-name">Mihai Ionescu</div>
+          <div class="testimonial-role">Fondator, Nomad Coffee</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CLIENȚI ===================== -->
+  <div class="clienti">
+    <div class="clienti-label reveal">Branduri cu care am lucrat</div>
+    <div class="clienti-logos reveal reveal-delay-1">
+      <span class="clienti-logo">Moldovan Construct</span>
+      <span class="clienti-logo">BeautyBox</span>
+      <span class="clienti-logo">Nomad Coffee</span>
+      <span class="clienti-logo">UrbanFit</span>
+      <span class="clienti-logo">Apex Media</span>
+    </div>
+  </div>
+
   <!-- ===================== STATISTICI ===================== -->
   <section class="stats" id="despre">
-    <div class="stats-bg"><img src="images/stats-bg.jpg" alt="" id="statsBg"/></div>
+    <div class="stats-bg"><img src="images/stats-bg.jpg" alt="" id="statsBg" loading="lazy"/></div>
     <div class="stat reveal">
       <div class="stat-num" data-count="34">0</div>
       <div class="stat-label">Clienți activi</div>
@@ -1059,11 +1328,45 @@
     </div>
   </section>
 
-  <!-- ===================== CTA ===================== -->
+  <!-- ===================== CTA / CONTACT ===================== -->
   <section class="cta" id="contact">
-    <div class="cta-bg"><img src="images/cta-bg.jpg" alt="" id="ctaBg"/></div>
-    <h2 class="reveal">Hai să<br/><em>construim.</em></h2>
-    <a href="mailto:contact@forge.ro" class="cta-btn reveal reveal-delay-1" data-cursor><span>Începe un proiect</span></a>
+    <div class="cta-bg"><img src="images/cta-bg.jpg" alt="" id="ctaBg" loading="lazy"/></div>
+    <div class="contact-wrap">
+      <h2 class="reveal">Hai să<br/><em>construim.</em></h2>
+      <form class="contact-form reveal reveal-delay-1" id="contactForm" novalidate>
+        <div class="f-field">
+          <label class="f-label" for="f-name">Numele tău <span aria-hidden="true">*</span></label>
+          <input class="f-input" type="text" id="f-name" name="name" autocomplete="name" required placeholder="Ion Popescu"/>
+        </div>
+        <div class="f-field">
+          <label class="f-label" for="f-email">Email <span aria-hidden="true">*</span></label>
+          <input class="f-input" type="email" id="f-email" name="email" autocomplete="email" required placeholder="ion@companie.ro"/>
+        </div>
+        <div class="f-field">
+          <label class="f-label" for="f-company">Companie</label>
+          <input class="f-input" type="text" id="f-company" name="company" autocomplete="organization" placeholder="Compania SRL"/>
+        </div>
+        <div class="f-field">
+          <label class="f-label" for="f-service">Serviciu dorit <span aria-hidden="true">*</span></label>
+          <select class="f-select" id="f-service" name="service" required>
+            <option value="" disabled selected>Alege un serviciu</option>
+            <option value="web">Web Design & Development</option>
+            <option value="branding">Branding & Identitate</option>
+            <option value="ads">Performance Ads</option>
+            <option value="video">Producție Video</option>
+            <option value="social">Social Media</option>
+            <option value="complet">Pachet Complet</option>
+          </select>
+        </div>
+        <div class="f-field full">
+          <label class="f-label" for="f-message">Mesaj <span aria-hidden="true">*</span></label>
+          <textarea class="f-textarea" id="f-message" name="message" required placeholder="Spune-ne despre proiectul tău…" rows="4"></textarea>
+        </div>
+        <div class="f-submit">
+          <button type="submit" class="cta-btn" data-cursor><span>Trimite proiectul</span></button>
+        </div>
+      </form>
+    </div>
   </section>
 
   <!-- ===================== FOOTER ===================== -->
@@ -1126,12 +1429,14 @@
     const menuToggle = document.getElementById('menuToggle');
     const nav = document.getElementById('nav');
     menuToggle.addEventListener('click', () => {
-      menuToggle.classList.toggle('open');
-      nav.classList.toggle('open');
+      const isOpen = nav.classList.toggle('open');
+      menuToggle.classList.toggle('open', isOpen);
+      menuToggle.setAttribute('aria-expanded', String(isOpen));
     });
     nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
       menuToggle.classList.remove('open');
       nav.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
     }));
 
     // ===== Scroll reveal =====
@@ -1253,6 +1558,39 @@
       const show = () => animate(img, { opacity: 1 }, { duration: 1, ease: 'easeOut' });
       img.complete ? show() : img.addEventListener('load', show);
     });
+
+    // ===== Active nav link on scroll =====
+    const navLinks = document.querySelectorAll('nav.main-nav a[href^="#"]');
+    const sections = [...navLinks].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const setActive = () => {
+      const mid = window.scrollY + window.innerHeight * 0.4;
+      let active = sections[0];
+      sections.forEach(s => { if (s.offsetTop <= mid) active = s; });
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active.id));
+    };
+    window.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+
+    // ===== Contact form =====
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = contactForm.querySelector('[type="submit"] span');
+        const orig = btn.textContent;
+        btn.textContent = 'Se trimite…';
+        contactForm.querySelector('[type="submit"]').disabled = true;
+        await new Promise(r => setTimeout(r, 1200));
+        btn.textContent = 'Trimis cu succes ✓';
+        animate(contactForm.querySelector('[type="submit"]'),
+          { background: ['var(--accent)', 'var(--accent)'] }, { duration: 0.3 });
+        setTimeout(() => {
+          btn.textContent = orig;
+          contactForm.querySelector('[type="submit"]').disabled = false;
+          contactForm.reset();
+        }, 3000);
+      });
+    }
   </script>
 </body>
 </html>
