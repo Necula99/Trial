@@ -155,7 +155,7 @@
     .menu-toggle { display: none; }
 
     /* =========================================================
-       HERO
+       HERO — CINEMATIC EDITION (Enhanced)
     ========================================================= */
     .hero {
       position: relative;
@@ -164,20 +164,21 @@
       width: 100%;
       overflow: hidden;
       display: flex;
-      align-items: flex-end;
+      flex-direction: column;
+      justify-content: flex-end;
     }
     .hero-bg {
       position: absolute;
       inset: -5%;
       z-index: 1;
       overflow: hidden;
+      will-change: transform;
     }
     .hero-bg img {
       width: 110%; height: 110%;
       object-fit: cover;
       object-position: center;
       filter: grayscale(1) contrast(1.08) brightness(0.68);
-      /* Efect Ken Burns — zoom + pan lent continuu, dă senzația de video */
       animation: kenBurns 24s ease-in-out infinite alternate;
       transform-origin: 70% 30%;
     }
@@ -189,16 +190,15 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(12,12,13,0.45) 0%, transparent 28%, transparent 55%, rgba(12,12,13,0.9) 100%);
+      background: linear-gradient(to bottom, rgba(12,12,13,0.45) 0%, transparent 28%, transparent 55%, rgba(12,12,13,0.92) 100%);
       z-index: 2;
     }
-    /* Lumină care pulsează subtil — viață atmosferică */
     .hero-light {
       position: absolute;
       top: 0; right: 0;
       width: 60%; height: 70%;
-      z-index: 1;
-      background: radial-gradient(ellipse at 80% 15%, rgba(255,250,240,0.18) 0%, transparent 55%);
+      z-index: 2;
+      background: radial-gradient(ellipse at 80% 15%, rgba(255,250,240,0.14) 0%, transparent 55%);
       animation: lightPulse 8s ease-in-out infinite alternate;
       pointer-events: none;
     }
@@ -206,94 +206,167 @@
       0%   { opacity: 0.6; }
       100% { opacity: 1; }
     }
-    /* Vignette pentru profunzime cinematică */
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--negru);
+      opacity: 0;
+      z-index: 4;
+      pointer-events: none;
+      will-change: opacity;
+    }
     .hero::before {
       content: '';
       position: absolute;
       inset: 0;
       z-index: 3;
       pointer-events: none;
-      box-shadow: inset 0 0 200px 60px rgba(0,0,0,0.6);
+      box-shadow: inset 0 0 200px 60px rgba(0,0,0,0.55);
     }
+
+    /* Top editorial bar */
+    .hero-topbar {
+      position: absolute;
+      top: 112px;
+      left: 48px; right: 48px;
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 16px;
+    }
+    .hero-tag {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gri-deschis);
+      opacity: 0;
+    }
+    .hero-chapter {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 22px;
+      color: rgba(245,244,241,0.28);
+    }
+
+    /* Main content — two-column bottom layout */
     .hero-content {
       position: relative;
-      z-index: 2;
+      z-index: 6;
       width: 100%;
-      padding: 0 48px 80px;
-      display: flex;
-      justify-content: space-between;
+      padding: 0 48px 52px;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 60px;
       align-items: flex-end;
     }
     .hero-title {
       font-family: var(--serif);
       font-weight: 300;
-      font-size: clamp(48px, 9vw, 150px);
+      font-size: clamp(52px, 9vw, 150px);
       line-height: 0.92;
       letter-spacing: -0.02em;
       color: var(--alb-pur);
-      max-width: 70%;
     }
-    .hero-title em {
-      font-style: italic;
-      color: var(--gri-deschis);
-    }
-    /* Reveal cinematic — fiecare linie urcă din jos */
+    .hero-title em { font-style: italic; color: var(--gri-deschis); }
     .hero-title .line-wrap {
       display: block;
       overflow: hidden;
+      will-change: transform, opacity;
     }
-    .hero-title .line-wrap span {
-      display: block;
-      transform: translateY(110%);
-      transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    .hero-title .line-wrap span { display: block; transform: translateY(110%); }
+
+    /* Right side column */
+    .hero-side-col {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: flex-start;
+      padding-bottom: 8px;
     }
-    .hero-title.in .line-wrap:nth-child(1) span { transition-delay: 0.3s; transform: translateY(0); }
-    .hero-title.in .line-wrap:nth-child(2) span { transition-delay: 0.45s; transform: translateY(0); }
-    .hero-title.in .line-wrap:nth-child(3) span { transition-delay: 0.6s; transform: translateY(0); }
-    .hero-meta {
-      text-align: right;
-      font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+    .hero-tagline {
+      font-size: 13px;
+      line-height: 1.8;
       color: var(--gri-deschis);
-      line-height: 2;
-      padding-bottom: 10px;
+      margin: 0;
+      opacity: 0;
     }
-    .hero-scroll {
+    .hero-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 28px;
+      border: 1px solid rgba(255,255,255,0.22);
+      color: var(--alb);
+      text-decoration: none;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.5s;
+      cursor: none;
+      opacity: 0;
+    }
+    .hero-cta-btn::before {
+      content: '';
       position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 3;
+      inset: 0;
+      background: var(--accent);
+      transform: translateX(-101%);
+      transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-cta-btn:hover { border-color: var(--accent); }
+    .hero-cta-btn:hover::before { transform: translateX(0); }
+    .hero-cta-btn span,
+    .hero-cta-btn svg { position: relative; z-index: 1; }
+    .hero-cta-btn svg { transition: transform 0.3s ease; }
+    .hero-cta-btn:hover svg { transform: translateX(5px); }
+    .hero-meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 18px;
+      width: 100%;
+      opacity: 0;
+    }
+    .hero-meta-list span {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(154,154,159,0.6);
+    }
+
+    /* Bottom ticker marquee */
+    .hero-ticker {
+      position: relative;
+      z-index: 6;
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      height: 42px;
+      display: flex;
+      align-items: center;
+      opacity: 0;
+    }
+    .hero-ticker-track {
+      display: flex;
+      gap: 52px;
+      align-items: center;
+      white-space: nowrap;
+      width: max-content;
+      animation: tickerRoll 32s linear infinite;
       font-size: 10px;
       letter-spacing: 3px;
       text-transform: uppercase;
       color: var(--gri-deschis);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
+      padding: 0 26px;
     }
-    .hero-scroll .line {
-      width: 1px; height: 50px;
-      background: linear-gradient(to bottom, var(--gri-deschis), transparent);
-      animation: scrollLine 2s ease-in-out infinite;
-    }
-    @keyframes scrollLine {
-      0%, 100% { transform: scaleY(1); opacity: 1; }
-      50% { transform: scaleY(0.5); opacity: 0.3; }
-    }
-
-    /* Top label deasupra hero */
-    .hero-tag {
-      position: absolute;
-      top: 120px;
-      left: 48px;
-      z-index: 2;
-      font-size: 11px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--gri-deschis);
+    .hero-ticker-track em { color: var(--accent); font-style: normal; }
+    @keyframes tickerRoll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
 
     /* =========================================================
@@ -782,6 +855,60 @@
     }
 
     /* =========================================================
+       FULL-SITE ANIMATION ENHANCEMENTS
+    ========================================================= */
+
+    /* Manifesto — animated gold accent line */
+    .manifesto-line {
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent) 40%, transparent);
+      margin: 36px auto 44px;
+      transition: width 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .manifesto-line.expanded { width: 120px; }
+
+    /* Testimonial — hover lift + accent border */
+    .testimonial-card {
+      transition: background .4s, transform .5s cubic-bezier(0.22, 1, 0.36, 1), border-color .4s, box-shadow .5s;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-12px);
+      border-color: rgba(201,162,39,0.35);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+
+    /* Client logos — staggered reveal via JS */
+    .clienti-logo { opacity: 0; transform: translateY(18px); }
+    .clienti-logo.revealed {
+      opacity: 0.28;
+      transform: translateY(0);
+      transition: opacity .7s ease, transform .7s cubic-bezier(0.22,1,0.36,1), color .3s;
+    }
+    .clienti-logo.revealed:hover { opacity: 0.7; color: var(--accent); }
+
+    /* CTA headline — line-mask reveal */
+    .cta h2 .lw { display: block; overflow: hidden; }
+    .cta h2 .lw span { display: block; transform: translateY(110%); }
+
+    /* Footer — entrance animation initial states */
+    .footer-logo { opacity: 0; transform: translateX(-28px); }
+    .footer-col  { opacity: 0; transform: translateY(22px); }
+    .footer-bottom-inner { opacity: 0; }
+
+    /* Section label — draw-in underline */
+    .section-label-line {
+      display: inline-block;
+      width: 0;
+      height: 1px;
+      background: var(--accent);
+      vertical-align: middle;
+      margin-left: 16px;
+      transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .section-label-line.expanded { width: 40px; }
+
+    /* =========================================================
        SCROLL REVEAL
     ========================================================= */
     .reveal {
@@ -1056,10 +1183,13 @@
       .menu-toggle.open span:nth-child(2) { opacity: 0; }
       .menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-      .hero-content { flex-direction: column; align-items: flex-start; gap: 30px; padding: 0 24px 60px; }
-      .hero-title { max-width: 100%; }
-      .hero-meta { text-align: left; }
-      .hero-tag { left: 24px; }
+      .hero-content { grid-template-columns: 1fr; gap: 20px; padding: 0 24px 52px; }
+      .hero-title { font-size: clamp(44px, 13vw, 80px); }
+      .hero-side-col { flex-direction: row; flex-wrap: wrap; gap: 16px; }
+      .hero-tagline, .hero-meta-list { display: none; }
+      .hero-topbar { left: 24px; right: 24px; top: 88px; }
+      .hero-chapter { display: none; }
+      .hero-cta-btn { opacity: 1 !important; }
 
       .chapter, .chapter.reverse { grid-template-columns: 1fr; }
       .chapter-text { padding: 60px 24px; order: 2 !important; }
@@ -1112,32 +1242,68 @@
   <!-- ===================== HERO ===================== -->
   <section class="hero" id="main-content">
     <div class="hero-bg" id="heroBg">
-      <img src="images/scene-hero.jpg" alt="Forge Studio"/>
+      <img src="images/scene-hero.jpg" alt="Forge Studio — Studio de marketing și producție"/>
     </div>
     <div class="hero-light"></div>
-    <div class="hero-tag reveal">Studio de Marketing & Producție — Est. 2026</div>
+    <div class="hero-overlay" id="heroOverlay"></div>
+
+    <!-- Editorial top bar -->
+    <div class="hero-topbar">
+      <div class="hero-tag" id="heroTag">Studio de Marketing & Producție — Est. 2026</div>
+      <div class="hero-chapter">01</div>
+    </div>
+
+    <!-- Two-column bottom content -->
     <div class="hero-content">
-      <h1 class="hero-title" id="heroTitle">
-        <span class="line-wrap"><span>Construim</span></span>
-        <span class="line-wrap"><span>brand-uri care</span></span>
-        <span class="line-wrap"><span><em>rămân.</em></span></span>
-      </h1>
-      <div class="hero-meta reveal reveal-delay-2">
-        Web · Branding<br/>
-        Performance Ads<br/>
-        Producție Video<br/>
-        Social Media
+      <div>
+        <h1 class="hero-title" id="heroTitle">
+          <span class="line-wrap"><span>Construim</span></span>
+          <span class="line-wrap"><span>brand-uri care</span></span>
+          <span class="line-wrap"><span><em>rămân.</em></span></span>
+        </h1>
+      </div>
+      <div class="hero-side-col" id="heroSideCol">
+        <p class="hero-tagline" id="heroTagline">Transformăm atenția<br/>în clienți reali.</p>
+        <a href="#contact" class="hero-cta-btn" id="heroCtaBtn" data-cursor>
+          <span>Începem un proiect</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <div class="hero-meta-list" id="heroMetaList">
+          <span>Web Design</span>
+          <span>Branding</span>
+          <span>Performance Ads</span>
+          <span>Producție Video</span>
+        </div>
       </div>
     </div>
-    <div class="hero-scroll">
-      <span>Scroll</span>
-      <div class="line"></div>
+
+    <!-- Marquee ticker -->
+    <div class="hero-ticker" id="heroTicker">
+      <div class="hero-ticker-track">
+        <span>Web Design</span><em>·</em>
+        <span>Performance Ads</span><em>·</em>
+        <span>Producție Video</span><em>·</em>
+        <span>Social Media</span><em>·</em>
+        <span>Branding</span><em>·</em>
+        <span>Google Ads</span><em>·</em>
+        <span>Mentenanță Web</span><em>·</em>
+        <span>Web Design</span><em>·</em>
+        <span>Performance Ads</span><em>·</em>
+        <span>Producție Video</span><em>·</em>
+        <span>Social Media</span><em>·</em>
+        <span>Branding</span><em>·</em>
+        <span>Google Ads</span><em>·</em>
+        <span>Mentenanță Web</span><em>·</em>
+      </div>
     </div>
   </section>
 
   <!-- ===================== MANIFESTO ===================== -->
   <section class="manifesto">
     <div class="manifesto-label reveal">Filozofia noastră</div>
+    <div class="manifesto-line" id="manifestoLine"></div>
     <p class="manifesto-text reveal reveal-delay-1">
       Nu facem doar site-uri și reclame. Construim <em>sisteme de creștere</em> — fiecare pixel, fiecare cadru și fiecare campanie gândite să transforme atenția în <em>clienți reali.</em>
     </p>
@@ -1301,7 +1467,7 @@
   <!-- ===================== CLIENȚI ===================== -->
   <div class="clienti">
     <div class="clienti-label reveal">Branduri cu care am lucrat</div>
-    <div class="clienti-logos reveal reveal-delay-1">
+    <div class="clienti-logos" id="clientiLogos">
       <span class="clienti-logo">Moldovan Construct</span>
       <span class="clienti-logo">BeautyBox</span>
       <span class="clienti-logo">Nomad Coffee</span>
@@ -1335,7 +1501,10 @@
   <section class="cta" id="contact">
     <div class="cta-bg"><img src="images/cta-bg.jpg" alt="" id="ctaBg" loading="lazy"/></div>
     <div class="contact-wrap">
-      <h2 class="reveal">Hai să<br/><em>construim.</em></h2>
+      <h2 id="ctaTitle">
+        <span class="lw"><span>Hai să</span></span>
+        <span class="lw"><em><span>construim.</span></em></span>
+      </h2>
       <form class="contact-form reveal reveal-delay-1" id="contactForm" novalidate>
         <div class="f-field">
           <label class="f-label" for="f-name">Numele tău <span aria-hidden="true">*</span></label>
@@ -1396,7 +1565,7 @@
         </div>
       </div>
     </div>
-    <div class="footer-bottom">
+    <div class="footer-bottom footer-bottom-inner">
       <span>© MMXXVI Forge Studio</span>
       <span>București, România</span>
     </div>
@@ -1451,23 +1620,45 @@
         { duration: 1.2, delay, ease: [0.22, 1, 0.36, 1] });
     }, { amount: 0.1 });
 
-    // ===== Hero title reveal =====
+    // ===== Hero reveal — sequenced entrance =====
     window.addEventListener('load', () => {
-      animate(
-        document.querySelectorAll('#heroTitle .line-wrap span'),
-        { transform: ['translateY(110%)', 'translateY(0%)'] },
-        { duration: 1.4, delay: stagger(0.15, { start: 0.3 }), ease: [0.16, 1, 0.3, 1] }
-      );
+      // Title lines rise up
+      const titleDelays = [0.3, 0.48, 0.65];
+      document.querySelectorAll('#heroTitle .line-wrap span').forEach((el, i) => {
+        animate(el, { transform: ['translateY(110%)', 'translateY(0%)'] },
+          { duration: 1.4, delay: titleDelays[i], ease: [0.16, 1, 0.3, 1] });
+      });
+      // Right column staggers in after title
+      animate('#heroTag',      { opacity: [0, 1] }, { duration: 1.0, delay: 0.5, ease: 'easeOut' });
+      animate('#heroTagline',  { opacity: [0, 1] }, { duration: 0.9, delay: 1.0, ease: 'easeOut' });
+      animate('#heroCtaBtn',   { opacity: [0, 1] }, { duration: 0.9, delay: 1.18, ease: 'easeOut' });
+      animate('#heroMetaList', { opacity: [0, 1] }, { duration: 0.9, delay: 1.35, ease: 'easeOut' });
+      animate('#heroTicker',   { opacity: [0, 1] }, { duration: 1.0, delay: 1.5, ease: 'easeOut' });
     });
 
-    // ===== Hero parallax — scroll-driven =====
+    // ===== Hero parallax — scroll-driven with cinematic drift =====
     const heroBg = document.getElementById('heroBg');
-    const heroContent = document.querySelector('.hero-content');
+    const heroOverlay = document.getElementById('heroOverlay');
+    const heroTitleLines = document.querySelectorAll('#heroTitle .line-wrap');
+    const heroSideCol = document.getElementById('heroSideCol');
     scroll((p) => {
       const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      // Background drifts down
       heroBg.style.transform = `translateY(${p * vh * 0.5}px)`;
-      heroContent.style.transform = `translateY(${p * vh * -0.15}px)`;
-      heroContent.style.opacity = Math.max(0, 1 - p / 0.7);
+      // Overlay darkens as hero exits
+      heroOverlay.style.opacity = Math.min(0.82, p * 1.6);
+      // Title lines drift apart (cinematic split on scroll)
+      const dirs = [-1, 0.35, 1];
+      heroTitleLines.forEach((line, i) => {
+        line.style.transform = `translateX(${p * vw * 0.14 * dirs[i]}px)`;
+        line.style.opacity = Math.max(0, 1 - p * 1.9);
+      });
+      // Side column floats up and fades faster
+      if (heroSideCol) {
+        heroSideCol.style.opacity = Math.max(0, 1 - p * 3.0);
+        heroSideCol.style.transform = `translateY(${-p * 45}px)`;
+      }
     }, { target: document.querySelector('.hero'), offset: ['start start', 'end start'] });
 
     // ===== Gallery scroll-linked =====
@@ -1600,6 +1791,58 @@
     };
     window.addEventListener('scroll', setActive, { passive: true });
     setActive();
+
+    // ===== Manifesto — gold accent line draws in =====
+    inView('#manifestoLine', ({ target }) => {
+      target.classList.add('expanded');
+    }, { amount: 0.5 });
+
+    // ===== Testimonials — staggered card entrance =====
+    inView('.testimoniale-grid', ({ target }) => {
+      const cards = target.querySelectorAll('.testimonial-card');
+      cards.forEach(card => { card.style.opacity = '0'; card.style.transform = 'translateY(56px)'; });
+      animate(cards,
+        { opacity: [0, 1], transform: ['translateY(56px)', 'translateY(0px)'] },
+        { duration: 1.1, delay: stagger(0.14), ease: [0.16, 1, 0.3, 1] }
+      );
+    }, { amount: 0.1 });
+
+    // ===== Client logos — staggered reveal =====
+    (function () {
+      const logos = document.querySelectorAll('.clienti-logo');
+      inView('#clientiLogos', () => {
+        logos.forEach((el, i) => {
+          setTimeout(() => el.classList.add('revealed'), i * 110);
+        });
+      }, { amount: 0.3 });
+    })();
+
+    // ===== CTA headline — line-mask dramatic reveal =====
+    inView('#ctaTitle', ({ target }) => {
+      animate(target.querySelectorAll('.lw span'),
+        { transform: ['translateY(110%)', 'translateY(0%)'] },
+        { duration: 1.4, delay: stagger(0.18, { start: 0.1 }), ease: [0.16, 1, 0.3, 1] }
+      );
+    }, { amount: 0.4 });
+
+    // ===== Footer — staggered entrance =====
+    inView('footer', ({ target }) => {
+      animate('.footer-logo',
+        { opacity: [0, 1], transform: ['translateX(-28px)', 'translateX(0)'] },
+        { duration: 1.0, ease: [0.22, 1, 0.36, 1] });
+      animate(target.querySelectorAll('.footer-col'),
+        { opacity: [0, 1], transform: ['translateY(22px)', 'translateY(0)'] },
+        { duration: 0.85, delay: stagger(0.1, { start: 0.25 }), ease: [0.22, 1, 0.36, 1] });
+      animate('.footer-bottom-inner',
+        { opacity: [0, 1] },
+        { duration: 0.8, delay: 0.7, ease: 'easeOut' });
+    }, { amount: 0.15 });
+
+    // ===== Manifesto text — subtle parallax on scroll =====
+    scroll(
+      animate('.manifesto-text', { transform: ['translateY(0px)', 'translateY(-20px)'] }, { ease: 'linear' }),
+      { target: document.querySelector('.manifesto'), offset: ['start end', 'end start'] }
+    );
 
     // ===== Contact form =====
     const contactForm = document.getElementById('contactForm');
