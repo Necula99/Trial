@@ -877,14 +877,12 @@
       box-shadow: 0 24px 60px rgba(0,0,0,0.5);
     }
 
-    /* Client logos — staggered reveal via JS */
-    .clienti-logo { opacity: 0; transform: translateY(18px); }
+    /* Client logos — staggered reveal via JS (image-based) */
     .clienti-logo.revealed {
-      opacity: 0.28;
+      opacity: 1;
       transform: translateY(0);
-      transition: opacity .7s ease, transform .7s cubic-bezier(0.22,1,0.36,1), color .3s;
+      transition: opacity .7s ease, transform .7s cubic-bezier(0.22,1,0.36,1);
     }
-    .clienti-logo.revealed:hover { opacity: 0.7; color: var(--accent); }
 
     /* CTA headline — line-mask reveal */
     .cta h2 .lw { display: block; overflow: hidden; }
@@ -1116,23 +1114,32 @@
       margin-bottom: 52px;
     }
     .clienti-logos {
-      display: flex;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      row-gap: 28px;
+      column-gap: 10px;
       align-items: center;
-      gap: 72px;
-      flex-wrap: wrap;
     }
     .clienti-logo {
-      font-family: var(--sans-exp);
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--alb);
-      opacity: 0.28;
-      transition: opacity .4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(18px);
     }
-    .clienti-logo:hover { opacity: 0.65; }
+    .clienti-logo img {
+      width: 100%;
+      height: auto;
+      max-height: 30px;
+      object-fit: contain;
+      filter: invert(1) grayscale(1);
+      mix-blend-mode: screen;
+      -webkit-mix-blend-mode: screen;
+      opacity: 0.5;
+      transition: opacity 0.35s ease;
+    }
+    .clienti-logo.revealed { opacity: 1; }
+    .clienti-logo.revealed:hover img { opacity: 1; }
 
     /* =========================================================
        CONTACT FORM
@@ -1246,7 +1253,8 @@
       .testimoniale { padding: 100px 24px; }
       .testimoniale-grid { grid-template-columns: 1fr; }
       .clienti { padding: 60px 24px; }
-      .clienti-logos { gap: 32px; }
+      .clienti-logos { grid-template-columns: repeat(4, 1fr); gap: 20px 12px; }
+      .clienti-logo img { max-height: 24px; }
       .contact-form { grid-template-columns: 1fr; gap: 0; }
       .f-field.full { grid-column: 1; }
       .cta { padding: 120px 24px; }
@@ -1508,11 +1516,38 @@
   <div class="clienti">
     <div class="clienti-label reveal">Branduri cu care am lucrat</div>
     <div class="clienti-logos" id="clientiLogos">
-      <span class="clienti-logo">Moldovan Construct</span>
-      <span class="clienti-logo">BeautyBox</span>
-      <span class="clienti-logo">Nomad Coffee</span>
-      <span class="clienti-logo">UrbanFit</span>
-      <span class="clienti-logo">Apex Media</span>
+      <div class="clienti-logo"><img src="images/client-logo-1.png"  alt="Diandra Events"  loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-2.png"  alt="Mavio"           loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-3.png"  alt="Noura"           loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-4.png"  alt="Hermann"         loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-5.png"  alt="MT Birou"        loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-6.png"  alt="ELEI"            loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-7.png"  alt="Eve Constantin"  loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-8.png"  alt="Diana's Beauty"  loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-9.png"  alt="Nel Dor"         loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-10.png" alt="Deea Self Wash"  loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-11.png" alt="FP Aesthetic"    loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-12.png" alt="Zenvia"          loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-13.png" alt="BeautyClasses"   loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-14.png" alt="Dr. Twins"       loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-15.png" alt="TwinsBeauty"     loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-16.png" alt="TwinsMedical"    loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-17.png" alt="Total MIV"       loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-18.png" alt="AS Studio"       loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-19.png" alt="Snowtox"         loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-20.png" alt="Filtrex"         loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-21.png" alt="Peruci"          loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-22.png" alt="ZEED"            loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-23.png" alt="Frozenix"        loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-24.png" alt="Art Dental"      loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-25.png" alt="Tutti"           loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-26.png" alt="Joeelle"         loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-27.png" alt="The Dome"        loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-28.png" alt="ABC"             loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-29.png" alt="Cedrelle"        loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-30.png" alt="Baliss"          loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-31.png" alt="Samira Teja"     loading="lazy"/></div>
+      <div class="clienti-logo"><img src="images/client-logo-32.png" alt="Maher"           loading="lazy"/></div>
     </div>
   </div>
 
