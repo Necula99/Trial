@@ -376,8 +376,7 @@
     ========================================================= */
     .gallery {
       position: relative;
-      /* Înălțimea totală = nr capitole × 100vh. Dă spațiu de scroll. */
-      height: 400vh;
+      height: 100vh;
     }
     .gallery-sticky {
       position: sticky;
@@ -560,7 +559,7 @@
     ========================================================= */
     .svc-gallery {
       position: relative;
-      height: 500vh; /* 5 servicii × 100vh */
+      height: 100vh;
     }
     .svc-sticky {
       position: sticky;
@@ -895,6 +894,47 @@
     .footer-logo { opacity: 0; transform: translateX(-28px); }
     .footer-col  { opacity: 0; transform: translateY(22px); }
     .footer-bottom-inner { opacity: 0; }
+
+    /* Slide galleries — auto-advance + click-to-scroll mode */
+    .gallery-sticky, .svc-sticky { cursor: pointer; }
+    .gallery-sticky[data-manual], .svc-sticky[data-manual] { cursor: zoom-out; }
+
+    /* ::before used for manual-mode hint overlay */
+    .gallery-sticky::before, .svc-sticky::before {
+      content: 'Scroll pentru slide-uri  ·  Click sau Esc pentru a ieși';
+      position: absolute;
+      bottom: 108px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .gallery-sticky[data-manual]::before,
+    .svc-sticky[data-manual]::before { opacity: 1; }
+
+    /* Progress bar for auto-advance */
+    .slide-progress-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: var(--accent);
+      z-index: 10;
+      width: 0%;
+      transition: width linear;
+    }
+
+    /* Click-to-explore hint (visible when hovering, hidden in manual) */
+    .gallery-sticky:not([data-manual]):hover::before,
+    .svc-sticky:not([data-manual]):hover::before {
+      content: 'Click pentru a naviga';
+      opacity: 0.35;
+    }
 
     /* Section label — draw-in underline */
     .section-label-line {
@@ -1661,93 +1701,142 @@
       }
     }, { target: document.querySelector('.hero'), offset: ['start start', 'end start'] });
 
-    // ===== Gallery scroll-linked =====
-    const gallery = document.getElementById('gallery');
-    const layers = document.querySelectorAll('.gallery-layer');
-    const panels = document.querySelectorAll('.gallery-panel');
-    const gDots = document.querySelectorAll('.gallery-dots .dot');
-    const galleryFig = document.getElementById('galleryFig');
-    const figLabels = [
-      'Fig. 01<br/>Digital Presence',
-      'Fig. 02<br/>Motion & Frame',
-      'Fig. 03<br/>Growth Engine',
-      'Fig. 04<br/>Always On'
-    ];
-    const N = layers.length;
-    let currentScene = -1;
+    // ===== Gallery — auto-advance + click-to-scroll =====
+    (function () {
+      const gallery   = document.getElementById('gallery');
+      const gSticky   = gallery.querySelector('.gallery-sticky');
+      const layers    = [...gallery.querySelectorAll('.gallery-layer')];
+      const panels    = [...gallery.querySelectorAll('.gallery-panel')];
+      const gDots     = [...gallery.querySelectorAll('.gallery-dots .dot')];
+      const galleryFig = document.getElementById('galleryFig');
+      const figLabels  = [
+        'Fig. 01<br/>Digital Presence', 'Fig. 02<br/>Motion & Frame',
+        'Fig. 03<br/>Growth Engine',    'Fig. 04<br/>Always On'
+      ];
+      const N = layers.length;
+      let gIdx = 0, gTimer = null, gManual = false;
 
-    scroll((p) => {
-      const scenePos = p * N;
-      const idx = Math.min(N - 1, Math.floor(scenePos));
-      const within = scenePos - idx;
-
-      if (idx !== currentScene) {
-        currentScene = idx;
-        layers.forEach((l, i) => l.classList.toggle('active', i === idx));
-        panels.forEach((pn, i) => pn.classList.toggle('active', i === idx));
-        gDots.forEach((d, i) => d.classList.toggle('active', i === idx));
-        galleryFig.innerHTML = figLabels[idx];
+      function gShow(i) {
+        gIdx = ((i % N) + N) % N;
+        layers.forEach((l, j)  => l.classList.toggle('active', j === gIdx));
+        panels.forEach((p, j)  => p.classList.toggle('active', j === gIdx));
+        gDots.forEach((d, j)   => d.classList.toggle('active', j === gIdx));
+        if (galleryFig) galleryFig.innerHTML = figLabels[gIdx];
       }
 
-      const img = layers[idx].querySelector('img');
-      if (img) img.style.transform = `scale(${1.05 + within * 0.18}) translate(${within * -4}%, ${within * -3}%)`;
+      function gStartAuto() {
+        clearInterval(gTimer);
+        gTimer = setInterval(() => gShow(gIdx + 1), 4200);
+      }
+      function gStopAuto() { clearInterval(gTimer); gTimer = null; }
 
-      const activePanel = panels[idx];
-      if (activePanel && activePanel.classList.contains('active'))
-        activePanel.style.transform = `translateY(${within * -30}px)`;
-
-    }, { target: gallery, offset: ['start start', 'end end'] });
-
-    // Gallery dots — click to jump to slide
-    gDots.forEach((dot, i) => {
-      dot.setAttribute('role', 'button');
-      dot.setAttribute('tabindex', '0');
-      const jumpGallery = () => {
-        const scrollRange = gallery.offsetHeight - window.innerHeight;
-        const target = gallery.offsetTop + (i / N) * scrollRange;
-        window.scrollTo({ top: target, behavior: 'smooth' });
-      };
-      dot.addEventListener('click', jumpGallery);
-      dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jumpGallery(); } });
-    });
-
-    // ===== Services scroll-linked =====
-    const svcGallery = document.getElementById('servicii');
-    const svcLayers = document.querySelectorAll('.svc-layer');
-    const svcPanels = document.querySelectorAll('.svc-panel');
-    const sDots = document.querySelectorAll('.svc-dots .d');
-    const SN = svcLayers.length;
-    let svcCurrent = -1;
-
-    scroll((p) => {
-      const pos = p * SN;
-      const idx = Math.min(SN - 1, Math.floor(pos));
-      const within = pos - idx;
-
-      if (idx !== svcCurrent) {
-        svcCurrent = idx;
-        svcLayers.forEach((l, i) => l.classList.toggle('active', i === idx));
-        svcPanels.forEach((pn, i) => pn.classList.toggle('active', i === idx));
-        sDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      function gEnterManual() {
+        if (gManual) return;
+        gManual = true; gStopAuto();
+        gSticky.setAttribute('data-manual', '');
+        document.body.style.overflow = 'hidden';
+      }
+      function gExitManual() {
+        if (!gManual) return;
+        gManual = false;
+        gSticky.removeAttribute('data-manual');
+        document.body.style.overflow = '';
+        gStartAuto();
       }
 
-      const img = svcLayers[idx].querySelector('img');
-      if (img) img.style.transform = `scale(${1.05 + within * 0.16}) translateX(${within * 3}%)`;
+      inView('#gallery', () => {
+        gShow(0); gStartAuto();
+        return () => { gStopAuto(); gExitManual(); };
+      }, { amount: 0.3 });
 
-    }, { target: svcGallery, offset: ['start start', 'end end'] });
+      gSticky.addEventListener('click', (e) => {
+        if (e.target.closest('.dot')) return;
+        gManual ? gExitManual() : gEnterManual();
+      });
+      gSticky.addEventListener('wheel', (e) => {
+        if (!gManual) return;
+        e.preventDefault();
+        gShow(e.deltaY > 0 ? gIdx + 1 : gIdx - 1);
+      }, { passive: false });
 
-    // Services dots — click to jump to slide
-    sDots.forEach((dot, i) => {
-      dot.setAttribute('role', 'button');
-      dot.setAttribute('tabindex', '0');
-      dot.setAttribute('aria-label', `Serviciu ${i + 1}`);
-      const jumpSvc = () => {
-        const scrollRange = svcGallery.offsetHeight - window.innerHeight;
-        const target = svcGallery.offsetTop + (i / SN) * scrollRange;
-        window.scrollTo({ top: target, behavior: 'smooth' });
-      };
-      dot.addEventListener('click', jumpSvc);
-      dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jumpSvc(); } });
+      gDots.forEach((dot, i) => {
+        dot.setAttribute('role', 'button');
+        dot.setAttribute('tabindex', '0');
+        dot.addEventListener('click',   (e) => { e.stopPropagation(); gShow(i); });
+        dot.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); gShow(i); } });
+      });
+
+      window._gExitManual = gExitManual;
+    })();
+
+    // ===== Services — auto-advance + click-to-scroll =====
+    (function () {
+      const svcGallery = document.getElementById('servicii');
+      const svcSticky  = svcGallery.querySelector('.svc-sticky');
+      const svcLayers  = [...svcGallery.querySelectorAll('.svc-layer')];
+      const svcPanels  = [...svcGallery.querySelectorAll('.svc-panel')];
+      const sDots      = [...svcGallery.querySelectorAll('.svc-dots .d')];
+      const SN = svcLayers.length;
+      let sIdx = 0, sTimer = null, sManual = false;
+
+      function sShow(i) {
+        sIdx = ((i % SN) + SN) % SN;
+        svcLayers.forEach((l, j) => l.classList.toggle('active', j === sIdx));
+        svcPanels.forEach((p, j) => p.classList.toggle('active', j === sIdx));
+        sDots.forEach((d, j)    => d.classList.toggle('active', j === sIdx));
+      }
+
+      function sStartAuto() {
+        clearInterval(sTimer);
+        sTimer = setInterval(() => sShow(sIdx + 1), 4200);
+      }
+      function sStopAuto() { clearInterval(sTimer); sTimer = null; }
+
+      function sEnterManual() {
+        if (sManual) return;
+        sManual = true; sStopAuto();
+        svcSticky.setAttribute('data-manual', '');
+        document.body.style.overflow = 'hidden';
+      }
+      function sExitManual() {
+        if (!sManual) return;
+        sManual = false;
+        svcSticky.removeAttribute('data-manual');
+        document.body.style.overflow = '';
+        sStartAuto();
+      }
+
+      inView('#servicii', () => {
+        sShow(0); sStartAuto();
+        return () => { sStopAuto(); sExitManual(); };
+      }, { amount: 0.3 });
+
+      svcSticky.addEventListener('click', (e) => {
+        if (e.target.closest('.d')) return;
+        sManual ? sExitManual() : sEnterManual();
+      });
+      svcSticky.addEventListener('wheel', (e) => {
+        if (!sManual) return;
+        e.preventDefault();
+        sShow(e.deltaY > 0 ? sIdx + 1 : sIdx - 1);
+      }, { passive: false });
+
+      sDots.forEach((dot, i) => {
+        dot.setAttribute('role', 'button');
+        dot.setAttribute('tabindex', '0');
+        dot.setAttribute('aria-label', `Serviciu ${i + 1}`);
+        dot.addEventListener('click',   (e) => { e.stopPropagation(); sShow(i); });
+        dot.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sShow(i); } });
+      });
+
+      window._sExitManual = sExitManual;
+    })();
+
+    // ===== Global Escape — exit any manual slide mode =====
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (window._gExitManual) window._gExitManual();
+      if (window._sExitManual) window._sExitManual();
     });
 
     // ===== Stats + CTA parallax — scroll-driven =====
