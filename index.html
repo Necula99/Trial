@@ -2558,11 +2558,27 @@
         if (e.target.closest('.dot')) return;
         gManual ? gExitManual() : gEnterManual();
       });
+
+      // Wheel with debounce — prevents touchpad from racing through slides
+      let gWheelAccum = 0, gWheelLocked = false;
       gSticky.addEventListener('wheel', (e) => {
         if (!gManual) return;
         e.preventDefault();
-        gShow(e.deltaY > 0 ? gIdx + 1 : gIdx - 1);
+        gWheelAccum += e.deltaY;
+        if (gWheelLocked || Math.abs(gWheelAccum) < 60) return;
+        gShow(gWheelAccum > 0 ? gIdx + 1 : gIdx - 1);
+        gWheelAccum = 0;
+        gWheelLocked = true;
+        setTimeout(() => { gWheelLocked = false; }, 750);
       }, { passive: false });
+
+      // Touch swipe support for mobile
+      let gTouchY = 0;
+      gSticky.addEventListener('touchstart', (e) => { gTouchY = e.touches[0].clientY; }, { passive: true });
+      gSticky.addEventListener('touchend', (e) => {
+        const delta = gTouchY - e.changedTouches[0].clientY;
+        if (Math.abs(delta) > 44) gShow(delta > 0 ? gIdx + 1 : gIdx - 1);
+      }, { passive: true });
 
       gDots.forEach((dot, i) => {
         dot.setAttribute('role', 'button');
@@ -2620,11 +2636,27 @@
         if (e.target.closest('.d')) return;
         sManual ? sExitManual() : sEnterManual();
       });
+
+      // Wheel with debounce — prevents touchpad from racing through slides
+      let sWheelAccum = 0, sWheelLocked = false;
       svcSticky.addEventListener('wheel', (e) => {
         if (!sManual) return;
         e.preventDefault();
-        sShow(e.deltaY > 0 ? sIdx + 1 : sIdx - 1);
+        sWheelAccum += e.deltaY;
+        if (sWheelLocked || Math.abs(sWheelAccum) < 60) return;
+        sShow(sWheelAccum > 0 ? sIdx + 1 : sIdx - 1);
+        sWheelAccum = 0;
+        sWheelLocked = true;
+        setTimeout(() => { sWheelLocked = false; }, 750);
       }, { passive: false });
+
+      // Touch swipe support for mobile
+      let sTouchY = 0;
+      svcSticky.addEventListener('touchstart', (e) => { sTouchY = e.touches[0].clientY; }, { passive: true });
+      svcSticky.addEventListener('touchend', (e) => {
+        const delta = sTouchY - e.changedTouches[0].clientY;
+        if (Math.abs(delta) > 44) sShow(delta > 0 ? sIdx + 1 : sIdx - 1);
+      }, { passive: true });
 
       sDots.forEach((dot, i) => {
         dot.setAttribute('role', 'button');
